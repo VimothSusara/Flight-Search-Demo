@@ -162,14 +162,7 @@ const FlightSearchPage = () => {
       setError("Outbound date must be tomorrow or later.");
       return;
     }
-    if (
-      searchParams.type === "2" &&
-      (!returnDate || returnDate <= outboundDate)
-    ) {
-      setError("Return date must be after outbound date.");
-      return;
-    }
-
+    
     setLoading(true);
     setError(null);
 
@@ -227,16 +220,6 @@ const FlightSearchPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchParams({ ...searchParams, [e.target.name]: e.target.value });
-  };
-
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
   };
 
   return (
