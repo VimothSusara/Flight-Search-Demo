@@ -58,7 +58,7 @@ const FlightDetailModal = ({
                 key={index}
                 className="border flex flex-row gap-2 px-3 py-2 shadow-md"
               >
-                <div className="w-20 flex items-center justify-center">
+                <div className="w-auto md:w-20 flex items-center justify-center">
                   <div className="flex flex-col items-center justify-center relative">
                     {/* Top dot */}
                     <div className="w-4 h-4 border-2 border-blue-500 rounded-full"></div>
