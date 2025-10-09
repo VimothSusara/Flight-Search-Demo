@@ -43,7 +43,7 @@ const FlightDetailModal = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setOpen}>
-        <DialogContent className="w-full max-w-[90vw] md:max-w-2xl h-screen md:max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-[90vw] md:max-w-2xl h-screen md:max-h-[80vh] overflow-y-auto no-scrollbar">
           <DialogHeader className="p-0 m-0">
             <DialogTitle className="text-2xl font-bold text-center text-[#42A5F5]">
               Flight Details

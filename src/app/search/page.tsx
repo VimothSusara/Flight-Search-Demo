@@ -759,7 +759,7 @@ const FlightSearchPage = () => {
 
           {/* Search Results */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:w-4/5 h-full mx-auto">
-            <div className="hidden md:col-span-1 border shadow md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar">
+            <div className="hidden md:col-span-1 border shadow md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar px-2 py-4">
               <div className="h-16 border-b flex justify-between items-center">
                 <Label
                   htmlFor="sort"

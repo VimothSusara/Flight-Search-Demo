@@ -83,7 +83,6 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
                       </div>
                     </div>
                   </div>
-
                   {index < parent_flight.flights.length - 1 && (
                     <Separator className="my-1" />
                   )}
