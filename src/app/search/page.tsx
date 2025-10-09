@@ -912,7 +912,7 @@ const FlightSearchPage = () => {
             </div>
             <Button
               type="button"
-              className="w-1/6 mx-auto cursor-pointer my-2 bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-500 hover:text-white transition-colors duration-300 rounded-sm"
+              className="w-full md:w-1/6 mx-auto cursor-pointer my-2 bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-500 hover:text-white transition-colors duration-300 rounded-sm"
               onClick={searchFlights}
             >
               <Search className="mr-2" />
