@@ -26,10 +26,6 @@ const formatTime = (timeString: string) => {
 const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const handleOpenModal = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsModalOpen(true);
-  };
 
   return (
     <>
@@ -88,9 +84,9 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
                     </div>
                   </div>
 
-                  {parent_flight.flights.length > 1 && index == 0 ? (
+                  {index < parent_flight.flights.length - 1 && (
                     <Separator className="my-1" />
-                  ) : null}
+                  )}
                 </>
               ))}
             </div>
