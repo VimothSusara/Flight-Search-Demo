@@ -6,6 +6,8 @@ import {
   Check,
   ChevronDownIcon,
   InfoIcon,
+  PlaneIcon,
+  RefreshCwIcon,
   Search,
 } from "lucide-react";
 import React from "react";
@@ -43,6 +45,14 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -203,6 +213,11 @@ const FlightSearchPage = () => {
   const [selectedArrivalAirports, setSelectedArrivalAirports] = React.useState<
     string[]
   >([]);
+  const [selectedFlightType, setSelectedFlightType] = React.useState<number>(1);
+  const [selectedTravelClass, setSelectedTravelClass] =
+    React.useState<number>(1);
+  const [selectedFlightStops, setSelectedFlightStops] =
+    React.useState<number>(0);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -343,9 +358,13 @@ const FlightSearchPage = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                    className="text-white hover:bg-[#1E88E5] hover:text-gray-100 transition-colors duration-200 cursor-pointer"
                   >
-                    Round Trip
+                    {selectedFlightType === 1
+                      ? "Round Trip"
+                      : selectedFlightType === 2
+                      ? "One Way"
+                      : ""}
                     <ChevronDownIcon size={20} />
                   </Button>
                 </PopoverTrigger>
@@ -356,7 +375,12 @@ const FlightSearchPage = () => {
                         <FieldLabel className="text-gray-500">
                           Flight Type
                         </FieldLabel>
-                        <RadioGroup defaultValue="1">
+                        <RadioGroup
+                          defaultValue="1"
+                          onValueChange={(value) => {
+                            setSelectedFlightType(parseInt(value));
+                          }}
+                        >
                           <FieldLabel htmlFor="round_trip-r2h">
                             <Field orientation="horizontal">
                               <FieldContent>
@@ -388,9 +412,17 @@ const FlightSearchPage = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                    className="text-white hover:bg-[#1E88E5] hover:text-gray-100 transition-colors duration-200 cursor-pointer"
                   >
-                    Travel Class
+                    {selectedTravelClass === 1
+                      ? "Economy"
+                      : selectedTravelClass === 2
+                      ? "Premium Economy"
+                      : selectedTravelClass === 3
+                      ? "Business"
+                      : selectedTravelClass === 4
+                      ? "First"
+                      : ""}
                     <ChevronDownIcon size={20} />
                   </Button>
                 </PopoverTrigger>
@@ -401,7 +433,12 @@ const FlightSearchPage = () => {
                         <FieldLabel className="text-gray-500">
                           Travel Class
                         </FieldLabel>
-                        <RadioGroup defaultValue="1">
+                        <RadioGroup
+                          defaultValue="1"
+                          onValueChange={(value) => {
+                            setSelectedTravelClass(parseInt(value));
+                          }}
+                        >
                           <FieldLabel htmlFor="economy-r2h">
                             <Field orientation="horizontal">
                               <FieldContent>
@@ -456,14 +493,144 @@ const FlightSearchPage = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                    className="text-white hover:bg-[#1E88E5] hover:text-gray-100 transition-colors duration-200 cursor-pointer"
                   >
                     Travelers
                     <ChevronDownIcon size={20} />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent>
-                  <div className="w-full max-w-md"></div>
+                  <div className="w-full max-w-md flex flex-col gap-4">
+                    {/* Adults */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-blue-600">Adults</p>
+                        <p className="text-sm text-gray-300">Age 12+</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              adults: String(
+                                Math.max(0, Number(prev.adults || "1") - 1)
+                              ),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          -
+                        </Button>
+                        <span className="w-4 text-center">
+                          {searchParams.adults || "1"}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              adults: String(Number(prev.adults || "1") + 1),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Children */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-blue-600">Children</p>
+                        <p className="text-sm text-gray-300">Age 2–11</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              children: String(
+                                Math.max(0, Number(prev.children || "0") - 1)
+                              ),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          -
+                        </Button>
+                        <span className="w-4 text-center">
+                          {searchParams.children || "0"}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              children: String(
+                                Number(prev.children || "0") + 1
+                              ),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Infants */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-blue-600">Infants</p>
+                        <p className="text-sm text-gray-300">Age 0–23</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              infants_on_lap: String(
+                                Math.max(
+                                  0,
+                                  Number(prev.infants_on_lap || "0") - 1
+                                )
+                              ),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          -
+                        </Button>
+                        <span className="w-4 text-center">
+                          {searchParams.infants_on_lap || "0"}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              infants_on_lap: String(
+                                Number(prev.infants_on_lap || "0") + 1
+                              ),
+                            }))
+                          }
+                          className="text-blue-600 hover:bg-blue-500 hover:text-white"
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </PopoverContent>
               </Popover>
 
@@ -471,9 +638,17 @@ const FlightSearchPage = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                    className="text-white hover:bg-[#1E88E5] hover:text-gray-100 transition-colors duration-200 cursor-pointer"
                   >
-                    Flight Stops
+                    {selectedFlightStops === 0
+                      ? "Any Stops"
+                      : selectedFlightStops === 1
+                      ? "Nonstop Only"
+                      : selectedFlightStops === 2
+                      ? "1 Stop or Fewer"
+                      : selectedFlightStops === 3
+                      ? "2 Stops or Fewer"
+                      : ""}
                     <ChevronDownIcon size={20} />
                   </Button>
                 </PopoverTrigger>
@@ -484,7 +659,12 @@ const FlightSearchPage = () => {
                         <FieldLabel className="text-gray-500">
                           Flight Stops
                         </FieldLabel>
-                        <RadioGroup defaultValue="0">
+                        <RadioGroup
+                          defaultValue="0"
+                          onValueChange={(value) => {
+                            setSelectedFlightStops(parseInt(value));
+                          }}
+                        >
                           <FieldLabel htmlFor="any_stops-r2h">
                             <Field orientation="horizontal">
                               <FieldContent>
@@ -542,7 +722,7 @@ const FlightSearchPage = () => {
                         variant="outline"
                         size="lg"
                         role="combobox"
-                        className="w-full"
+                        className="w-full text-blue-500 font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                       >
                         {departure
                           ? airports.find(
@@ -597,7 +777,7 @@ const FlightSearchPage = () => {
                         variant="outline"
                         size="lg"
                         role="combobox"
-                        className="w-full"
+                        className="w-full text-blue-500 font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                       >
                         {arrival
                           ? airports.find(
@@ -942,10 +1122,23 @@ const FlightSearchPage = () => {
               {error && <p className="text-red-500">{error}</p>}
               {!loading && !error && flights.length === 0 && (
                 <div className="items-center">
-                  <p className="text-gray-500 flex justify-center items-center">
-                    <InfoIcon className="mr-2" />
-                    No flights found
-                  </p>
+                  <Empty className="from-muted/50 to-background h-full bg-gradient-to-b from-30%">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon" className="text-blue-300">
+                        <PlaneIcon />
+                      </EmptyMedia>
+                      <EmptyTitle className="text-blue-400">No Flights Found</EmptyTitle>
+                      <EmptyDescription className="text-muted-foreground text-xs">
+                        We couldn&apos;t find any flights matching your criteria.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Button variant="outline" size="sm" className="mt-2 bg-white text-blue-400 hover:bg-blue-400 hover:text-white" onClick={searchFlights}>
+                        <RefreshCwIcon />
+                        Refresh
+                      </Button>
+                    </EmptyContent>
+                  </Empty>
                 </div>
               )}
               {!loading && !error && flights.length > 0 && (
