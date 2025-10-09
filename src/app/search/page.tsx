@@ -2,12 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeftRight,
   CalendarIcon,
   Check,
-  PlaneIcon,
-  PlaneLandingIcon,
-  PlaneTakeoffIcon,
+  ChevronDownIcon,
+  InfoIcon,
+  Search,
 } from "lucide-react";
 import React from "react";
 import {
@@ -29,14 +28,25 @@ import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import FlightCard from "@/components/FlightCard";
+import Header from "@/components/Header";
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+  FieldTitle,
+} from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const airports = [
   {
@@ -109,6 +119,46 @@ interface PriceInsights {
   price_history: [number, number][];
 }
 
+const FlightCardSkeleton = () => (
+  <div className="w-full">
+    <div className="border rounded-lg shadow-sm p-4 flex justify-between items-center animate-pulse bg-white">
+      {/* Left side */}
+      <div className="flex flex-1 justify-between items-center">
+        {/* Departure */}
+        <div className="flex flex-col items-center space-y-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-3 w-8" />
+        </div>
+
+        {/* Middle: line with dots */}
+        <div className="flex flex-col items-center justify-center">
+          <Skeleton className="h-3 w-3 rounded-full" />
+          <Skeleton className="h-8 w-px my-1" />
+          <Skeleton className="h-3 w-3 rounded-full" />
+        </div>
+
+        {/* Arrival */}
+        <div className="flex flex-col items-center space-y-2">
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-3 w-8" />
+        </div>
+
+        {/* Airline */}
+        <div className="flex flex-col items-end space-y-2">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+
+      {/* Right side (price & button) */}
+      <div className="hidden md:flex flex-col items-center justify-center pl-4 w-32 space-y-3">
+        <Skeleton className="h-6 w-16" />
+        <Skeleton className="h-8 w-24 rounded-md" />
+      </div>
+    </div>
+  </div>
+);
+
 const FlightSearchPage = () => {
   const getTomorrow = () => {
     const today = new Date();
@@ -147,6 +197,12 @@ const FlightSearchPage = () => {
   const [returnDate, setReturnDate] = React.useState<Date | undefined>(
     getDayAfterTomorrow()
   );
+  const [selectedAirlines, setSelectedAirlines] = React.useState<string[]>([]);
+  const [selectedDepartureAirports, setSelectedDepartureAirports] =
+    React.useState<string[]>([]);
+  const [selectedArrivalAirports, setSelectedArrivalAirports] = React.useState<
+    string[]
+  >([]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -162,7 +218,7 @@ const FlightSearchPage = () => {
       setError("Outbound date must be tomorrow or later.");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
@@ -204,6 +260,26 @@ const FlightSearchPage = () => {
       } else {
         setFlights(data.flights_data || []);
         setPriceInsights(data.price_insights || null);
+
+        // if (data.flights_data) {
+        //   // Auto-select airlines
+        //   const airlines = new Set<string>();
+        //   const departureAirports = new Set<string>();
+        //   const arrivalAirports = new Set<string>();
+
+        //   data.flights_data.forEach((f: Flight) =>
+        //     f.flights.forEach((ff) => {
+        //       airlines.add(ff.airline);
+        //       departureAirports.add(ff.departure_airport.name);
+        //       arrivalAirports.add(ff.arrival_airport.name);
+        //     })
+        //   );
+
+        //   setSelectedAirlines(Array.from(airlines));
+        //   setSelectedDepartureAirports(Array.from(departureAirports));
+        //   setSelectedArrivalAirports(Array.from(arrivalAirports));
+        // }
+
         if (
           searchParams.type === "1" &&
           data.flights_data.every((f: Flight) => f.type === "One way")
@@ -222,25 +298,252 @@ const FlightSearchPage = () => {
     }
   };
 
+  const availableAirlines = React.useMemo(() => {
+    const airlineSet = new Set<string>();
+    flights.forEach((f) =>
+      f.flights.forEach((ff) => airlineSet.add(ff.airline))
+    );
+    return Array.from(airlineSet);
+  }, [flights]);
+
+  const availableDepartureAirports = React.useMemo(() => {
+    const set = new Set<string>();
+    flights.forEach((f) =>
+      f.flights.forEach((ff) => set.add(ff.departure_airport.name))
+    );
+    return Array.from(set);
+  }, [flights]);
+
+  const availableArrivalAirports = React.useMemo(() => {
+    const set = new Set<string>();
+    flights.forEach((f) =>
+      f.flights.forEach((ff) => set.add(ff.arrival_airport.name))
+    );
+    return Array.from(set);
+  }, [flights]);
+
   return (
     <>
-      <div className="container mx-auto py-2 text-center min-h-screen">
-        <header className="sticky top-0 z-30 flex items-center justify-center gap-4 border-b bg-background px-4 py-2 shadow-md shadow-blue-100">
-          <div className="container flex items-center justify-center gap-3 text-blue-700">
-            <PlaneIcon size={30} />
-            <h1 className="text-3xl font-bold">Flight Search</h1>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gray-50" style={{}}>
+        <Header />
 
-        <main className="mt-3 lg:mt-4 w-full min-h-[calc(100vh-5.5rem)] lg:w-3/4 mx-auto flex flex-col gap-4">
-          <div className="flex flex-col gap-4">
-            <div className="px-4 py-3 space-y-3">
-              <div className="flex gap-3">
-                <div className="flex gap-1 items-center justify-center">
-                  <PlaneTakeoffIcon size={20} />
+        <main className="w-full mx-auto flex flex-col gap-4">
+          {/* search section */}
+          <div
+            className="flex flex-col w-full lg:w-4/5 mx-auto gap-1 rounded-none bg-white shadow-md"
+            style={{
+              marginTop: "-5.5rem",
+              zIndex: 40,
+              position: "relative",
+              background: "transparent",
+            }}
+          >
+            <div className="flex">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                  >
+                    Round Trip
+                    <ChevronDownIcon size={20} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="w-full max-w-md">
+                    <FieldGroup>
+                      <FieldSet>
+                        <FieldLabel className="text-gray-500">
+                          Flight Type
+                        </FieldLabel>
+                        <RadioGroup defaultValue="1">
+                          <FieldLabel htmlFor="round_trip-r2h">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Round Trip
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="1" id="round_trip-r2h" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="one_way-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  One Way
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="2" id="one_way-ow" />
+                            </Field>
+                          </FieldLabel>
+                        </RadioGroup>
+                      </FieldSet>
+                    </FieldGroup>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                  >
+                    Travel Class
+                    <ChevronDownIcon size={20} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="w-full max-w-md">
+                    <FieldGroup>
+                      <FieldSet>
+                        <FieldLabel className="text-gray-500">
+                          Travel Class
+                        </FieldLabel>
+                        <RadioGroup defaultValue="1">
+                          <FieldLabel htmlFor="economy-r2h">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Economy
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="1" id="economy-r2h" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="premium-economy-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Premium Economy
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem
+                                value="2"
+                                id="premium-economy-ow"
+                              />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="business-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Business
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="3" id="business-ow" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="first-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  First
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="4" id="first-ow" />
+                            </Field>
+                          </FieldLabel>
+                        </RadioGroup>
+                      </FieldSet>
+                    </FieldGroup>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                  >
+                    Travelers
+                    <ChevronDownIcon size={20} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="w-full max-w-md"></div>
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-blue-500 hover:text-gray-100 transition-colors duration-200 cursor-pointer"
+                  >
+                    Flight Stops
+                    <ChevronDownIcon size={20} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <div className="w-full max-w-md">
+                    <FieldGroup>
+                      <FieldSet>
+                        <FieldLabel className="text-gray-500">
+                          Flight Stops
+                        </FieldLabel>
+                        <RadioGroup defaultValue="0">
+                          <FieldLabel htmlFor="any_stops-r2h">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Any No. of Stops
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="0" id="any_stops-r2h" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="nonstop-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  Nonstop Only
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="1" id="nonstop-ow" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="1_stop-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  1 Stop or Fewer
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="2" id="1_stop-ow" />
+                            </Field>
+                          </FieldLabel>
+                          <FieldLabel htmlFor="2_stop-ow">
+                            <Field orientation="horizontal">
+                              <FieldContent>
+                                <FieldTitle className="text-blue-500">
+                                  2 Stops or Fewer
+                                </FieldTitle>
+                              </FieldContent>
+                              <RadioGroupItem value="3" id="2_stop-ow" />
+                            </Field>
+                          </FieldLabel>
+                        </RadioGroup>
+                      </FieldSet>
+                    </FieldGroup>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <div className="grid grid-cols-4">
+                <div className="col-span-2 lg:col-span-1">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" role="combobox" className="">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        role="combobox"
+                        className="w-full"
+                      >
                         {departure
                           ? airports.find(
                               (airport) => airport.value === departure
@@ -287,14 +590,15 @@ const FlightSearchPage = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="flex items-center justify-center">
-                  <ArrowLeftRight size={20} />
-                </div>
-                <div className="flex gap-1 items-center justify-center">
-                  <PlaneLandingIcon size={20} />
+                <div className="col-span-2 lg:col-span-1">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" role="combobox" className="">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        role="combobox"
+                        className="w-full"
+                      >
                         {arrival
                           ? airports.find(
                               (airport) => airport.value === arrival
@@ -339,23 +643,24 @@ const FlightSearchPage = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-              </div>
-              <div className="flex gap-3">
-                <div>
-                  <Label className="my-2">OutBound Date</Label>
+                <div className="col-span-2 lg:col-span-1">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         data-empty={!outboundDate}
-                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal w-full"
+                        size="lg"
                       >
-                        <CalendarIcon />
-                        {outboundDate ? (
-                          format(outboundDate, "yyyy-MM-dd")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          <CalendarIcon className="text-blue-500" size={18} />
+                          <span>
+                            {outboundDate
+                              ? format(outboundDate, "EEE, MMM d")
+                              : "Depart"}
+                          </span>
+                        </div>
+                        <ChevronDownIcon className="text-gray-400" size={18} />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -383,21 +688,24 @@ const FlightSearchPage = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div>
-                  <Label className="my-2">Return Date</Label>
+                <div className="col-span-2 lg:col-span-1">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         data-empty={!returnDate}
-                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal w-full"
+                        size="lg"
                       >
-                        <CalendarIcon />
-                        {returnDate ? (
-                          format(returnDate, "yyyy-MM-dd")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          <CalendarIcon className="text-blue-500" size={18} />
+                          <span>
+                            {returnDate
+                              ? format(returnDate, "EEE, MMM d")
+                              : "Return"}
+                          </span>
+                        </div>
+                        <ChevronDownIcon className="text-gray-400" size={18} />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -421,89 +729,18 @@ const FlightSearchPage = () => {
                   </Popover>
                 </div>
               </div>
-              <div className="flex gap-3">
-                {/* Flight Type */}
-                <Select
-                  //   value={searchParams.type}
-                  onValueChange={(value) => {
-                    setSearchParams({
-                      ...searchParams,
-                      type: value,
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Flight Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Flight Types</SelectLabel>
-                      <SelectItem value="1">Round Trip</SelectItem>
-                      <SelectItem value="2">One-Way</SelectItem>
-                      <SelectItem value="3">Multi-City</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                {/* Flight Travel Class */}
-                <Select
-                  //   value={searchParams.travel_class}
-                  onValueChange={(value) => {
-                    setSearchParams({
-                      ...searchParams,
-                      travel_class: value,
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Travel Class" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Travel Class</SelectLabel>
-                      <SelectItem value="1">Economy</SelectItem>
-                      <SelectItem value="2">Premium economy</SelectItem>
-                      <SelectItem value="3">Business</SelectItem>
-                      <SelectItem value="4">First</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                {/* Flight Stops */}
-                <Select
-                  //   value={searchParams.stops}
-                  onValueChange={(value) => {
-                    setSearchParams({
-                      ...searchParams,
-                      stops: value,
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Flight Stops" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Flight Tops</SelectLabel>
-                      <SelectItem value="0">Any No. of Stops</SelectItem>
-                      <SelectItem value="1">Nonstop Only</SelectItem>
-                      <SelectItem value="2">1 Stop or Fewer</SelectItem>
-                      <SelectItem value="3">2 Stops or Fewer</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <Button
               type="button"
-              className="w-1/5 mx-auto cursor-pointer"
+              className="w-1/6 mx-auto cursor-pointer my-2 bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-500 hover:text-white transition-colors duration-300 rounded-sm"
               onClick={searchFlights}
             >
+              <Search className="mr-2" />
               Search Flights
             </Button>
           </div>
 
-          {priceInsights && (
+          {/* {priceInsights && (
             <div className="border rounded-lg p-4 bg-gray-100">
               <h2 className="text-lg font-semibold">Price Insights</h2>
               <p>
@@ -518,24 +755,240 @@ const FlightSearchPage = () => {
                 {priceInsights.typical_price_range[1]}
               </p>
             </div>
-          )}
+          )} */}
 
           {/* Search Results */}
-          <div className="w-full h-full">
-            {loading && <p>Loading...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && flights.length === 0 && (
-              <p>No flights found</p>
-            )}
-            {!loading && !error && flights.length > 0 && (
-              <div className="grid gap-4">
-                {flights.map((flight, index) => (
-                  <div key={index} className="w-full rounded-lg shadow-md px-3 py-2">
-                    <FlightCard parent_flight={flight} />
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:w-4/5 h-full mx-auto">
+            <div className="hidden md:col-span-1 border shadow md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar">
+              <div className="h-16 border-b flex justify-between items-center">
+                <Label
+                  htmlFor="sort"
+                  className=" font-semibold text-muted-foreground px-2"
+                >
+                  Sort by
+                </Label>
+
+                <Select>
+                  <SelectTrigger
+                    className="w-32 mr-2 mt-2 mb-2"
+                    size="sm"
+                    defaultValue="1"
+                  >
+                    <SelectValue
+                      placeholder="Select..."
+                      className="bg-transparent"
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Top Flights</SelectItem>
+                    <SelectItem value="2">Price</SelectItem>
+                    <SelectItem value="3">Departure Time</SelectItem>
+                    <SelectItem value="4">Arrival Time</SelectItem>
+                    <SelectItem value="5">Duration</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+
+              <Separator className="" />
+
+              <div className="flex justify-between px-2 my-3">
+                <Label className="text-muted-foreground">Filters</Label>
+
+                <Label className="cursor-pointer text-xs font-normal">
+                  {flights.length} results
+                </Label>
+              </div>
+
+              <Separator className="" />
+
+              <div className="flex flex-col px-2 mt-3 gap-2">
+                <div className="flex flex-start">
+                  <Label className="text-muted-foreground">Airlines</Label>
+                </div>
+
+                <div className="flex flex-col space-y-4 my-3">
+                  {availableAirlines.length > 0 ? (
+                    availableAirlines.map((airline, index) => (
+                      <div
+                        key={airline}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <Checkbox
+                          className=""
+                          checked={selectedAirlines.includes(airline)}
+                          onCheckedChange={(checked) => {
+                            setSelectedAirlines((prev) =>
+                              checked
+                                ? [...prev, airline]
+                                : prev.filter((a) => a !== airline)
+                            );
+                          }}
+                          id={`airline-${index}`}
+                        />
+                        <Label
+                          htmlFor={`airline-${index}`}
+                          className="cursor-pointer text-gray-600"
+                        >
+                          {airline}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No airlines available
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="" />
+
+              <div className="flex flex-col px-2 mt-3 gap-2">
+                <div className="flex flex-start">
+                  <Label className="text-muted-foreground">
+                    Departure Airports
+                  </Label>
+                </div>
+
+                <div className="flex flex-col space-y-4 my-3">
+                  {availableDepartureAirports.length > 0 ? (
+                    availableDepartureAirports.map((airport, index) => (
+                      <div
+                        key={airport}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <Checkbox
+                          className=""
+                          checked={selectedDepartureAirports.includes(airport)}
+                          onCheckedChange={(checked) => {
+                            setSelectedDepartureAirports((prev) =>
+                              checked
+                                ? [...prev, airport]
+                                : prev.filter((a) => a !== airport)
+                            );
+                          }}
+                          id={`airport-${index}`}
+                        />
+                        <Label
+                          htmlFor={`airport-${index}`}
+                          className="cursor-pointer text-gray-600"
+                        >
+                          {airport}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No airports available
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="" />
+
+              <div className="flex flex-col px-2 mt-3 gap-2">
+                <div className="flex flex-start">
+                  <Label className="text-muted-foreground">
+                    Arrival Airports
+                  </Label>
+                </div>
+
+                <div className="flex flex-col space-y-4 my-3">
+                  {availableArrivalAirports.length > 0 ? (
+                    availableArrivalAirports.map((airport, index) => (
+                      <div
+                        key={airport}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <Checkbox
+                          className=""
+                          checked={selectedArrivalAirports.includes(airport)}
+                          onCheckedChange={(checked) => {
+                            setSelectedArrivalAirports((prev) =>
+                              checked
+                                ? [...prev, airport]
+                                : prev.filter((a) => a !== airport)
+                            );
+                          }}
+                          id={`airport-${index}`}
+                        />
+                        <Label
+                          htmlFor={`airport-${index}`}
+                          className="cursor-pointer text-gray-600"
+                        >
+                          {airport}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No airports available
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="" />
+            </div>
+            <div className="col-span-1 md:col-span-3 border-none">
+              {loading && (
+                <div className="grid gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <FlightCardSkeleton key={i} />
+                  ))}
+                </div>
+              )}
+              {error && <p className="text-red-500">{error}</p>}
+              {!loading && !error && flights.length === 0 && (
+                <div className="items-center">
+                  <p className="text-gray-500 flex justify-center items-center">
+                    <InfoIcon className="mr-2" />
+                    No flights found
+                  </p>
+                </div>
+              )}
+              {!loading && !error && flights.length > 0 && (
+                <div className="grid gap-4">
+                  {flights
+                    .filter((flight) => {
+                      // Airline filter
+                      const matchesAirline =
+                        selectedAirlines.length === 0 ||
+                        flight.flights.some((f) =>
+                          selectedAirlines.includes(f.airline)
+                        );
+
+                      // Departure airport filter
+                      const matchesDeparture =
+                        selectedDepartureAirports.length === 0 ||
+                        flight.flights.some((f) =>
+                          selectedDepartureAirports.includes(
+                            f.departure_airport.name
+                          )
+                        );
+
+                      // Arrival airport filter
+                      const matchesArrival =
+                        selectedArrivalAirports.length === 0 ||
+                        flight.flights.some((f) =>
+                          selectedArrivalAirports.includes(
+                            f.arrival_airport.name
+                          )
+                        );
+
+                      return (
+                        matchesAirline && matchesDeparture && matchesArrival
+                      );
+                    })
+                    .map((flight, index) => (
+                      <div key={index} className="w-full px-3 py-2">
+                        <FlightCard parent_flight={flight} />
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>

@@ -1,14 +1,12 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Flight } from "@/app/search/page";
 import Image from "next/image";
 import { format, parse } from "date-fns";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import FlightDetailModal from "./FlightDetailModal";
+import { Separator } from "./ui/separator";
 
 const formatDuration = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
@@ -26,80 +24,100 @@ const formatTime = (timeString: string) => {
 };
 
 const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const handleOpenModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
   return (
     <>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex gap-4">Departure</CardTitle>
-          <CardDescription></CardDescription>
-        </CardHeader>
+      <Card
+        className="w-full py-2 m-0 shadow-sm hover:shadow-lg transition-shadow"
+        onClick={(e) => {
+          setIsModalOpen(true);
+        }}
+      >
         <CardContent>
-          <div className="flex flex-col gap-2 p-1">
-            {parent_flight.flights.map((flight, index) => (
-              <div
-                key={index}
-                className="w-full flex gap-2 items-center justify-between space-y-4 bg-gray-100 px-3 py-1 rounded-md"
-              >
-                <div className="flex gap-2 items-center justify-center space-x-3">
-                  <img
-                    src={flight.airline_logo}
-                    alt="flight logo"
-                    width={34}
-                    height={34}
-                  />
-                  <div className="flex flex-col gap-1 text-start">
-                    <p className="text-sm">
-                      {formatTime(flight.departure_airport.time)} -{" "}
-                      {flight.departure_airport.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDuration(flight.duration)}
-                    </p>
-                    <p className="text-sm">
-                      {formatTime(flight.arrival_airport.time)} -{" "}
-                      {flight.arrival_airport.name}
-                    </p>
-                    <p className="text-xs">
-                      {flight.airline} - {flight.flight_number} (
-                      {flight.airplane})
-                    </p>
-                    <p className="text-xs">Class: {flight.travel_class}</p>
-                    {flight.legroom && (
-                      <p className="text-xs">Legroom: {flight.legroom}</p>
-                    )}
-                    {flight.often_delayed_by_over_30_min && (
-                      <p className="text-xs text-yellow-600">
-                        Warning: Often delayed by over 30 minutes
-                      </p>
-                    )}
+          <div className="flex flex-row gap-4">
+            {/* Left side: wider */}
+            <div className="flex-1 flex flex-col gap-1">
+              {parent_flight.flights.map((flight, index) => (
+                <>
+                  <div key={index} className="flex flex-col gap-2 p-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-col">
+                        <p className="flex flex-col gap-2 justify-center items-center">
+                          <span className="font-semibold">
+                            {formatTime(flight.departure_airport.time)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {flight.departure_airport.id}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <p className="text-muted-foreground">
+                          {formatDuration(flight.duration)}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <p className="flex flex-col gap-2 justify-center items-center">
+                          <span className="font-semibold">
+                            {formatTime(flight.arrival_airport.time)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {flight.arrival_airport.id}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={flight.airline_logo}
+                          alt="flight logo"
+                          width={34}
+                          height={34}
+                          style={{ objectFit: "contain" }}
+                          unoptimized={true}
+                        />
+                        <span className="text-gray-600 font-semibold">
+                          {flight.airline}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-1 text-end">
-                  {flight.legroom && (
-                    <p className="text-xs text-muted-foreground"></p>
-                  )}
-                  {flight.extensions.map((extension, index) => (
-                    <p key={index} className="text-xs text-muted-foreground">
-                      {extension}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {parent_flight.layovers && parent_flight.layovers.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold">Layovers</h3>
-                {parent_flight.layovers.map((layover, index) => (
-                  <p key={index} className="text-xs">
-                    {layover.name} ({layover.id}) for{" "}
-                    {formatDuration(layover.duration)}
-                  </p>
-                ))}
-              </div>
-            )}
+
+                  {parent_flight.flights.length > 1 && index == 0 ? (
+                    <Separator className="my-1" />
+                  ) : null}
+                </>
+              ))}
+            </div>
+
+            {/* Right side: narrower */}
+            <div className="hidden w-32 md:flex flex-col items-center justify-center p-2 border-l">
+              <Label>
+                <span className="font-semibold text-xl text-gray-600">
+                  ${parent_flight.price}
+                </span>
+              </Label>
+              <Button className="mt-4 w-full" variant="secondary" size="sm">
+                View Details
+              </Button>
+              {/* You can add more layover details here */}
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {isModalOpen && (
+        <FlightDetailModal
+          parent_flight={parent_flight}
+          isOpen={isModalOpen}
+          setOpen={setIsModalOpen}
+        />
+      )}
     </>
   );
 };
