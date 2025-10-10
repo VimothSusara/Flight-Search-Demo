@@ -343,9 +343,11 @@ const FlightSearchPage = () => {
 
   const availableTravelOffices = React.useMemo(() => {
     const set = new Set<string>();
-    flights.forEach((f) =>
-      f.travel_offices.forEach((office) => set.add(office.name))
-    );
+    flights.forEach((f) => {
+      if (f.travel_offices) {
+        f.travel_offices.forEach((office) => set.add(office.name));
+      }
+    });
     return Array.from(set);
   }, [flights]);
 
