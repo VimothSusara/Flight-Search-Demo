@@ -120,6 +120,7 @@ export interface Flight {
   airline_logo: string;
   extensions: string[];
   booking_token: string;
+  travel_offices?: { name: string; code: string; price: number }[];
 }
 
 interface PriceInsights {
@@ -218,6 +219,9 @@ const FlightSearchPage = () => {
     React.useState<number>(1);
   const [selectedFlightStops, setSelectedFlightStops] =
     React.useState<number>(0);
+  const [selectedTravelOffices, setSelectedTravelOffices] = React.useState<
+    string[]
+  >([]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -333,6 +337,14 @@ const FlightSearchPage = () => {
     const set = new Set<string>();
     flights.forEach((f) =>
       f.flights.forEach((ff) => set.add(ff.arrival_airport.name))
+    );
+    return Array.from(set);
+  }, [flights]);
+
+  const availableTravelOffices = React.useMemo(() => {
+    const set = new Set<string>();
+    flights.forEach((f) =>
+      f.travel_offices.forEach((office) => set.add(office.name))
     );
     return Array.from(set);
   }, [flights]);
@@ -983,6 +995,50 @@ const FlightSearchPage = () => {
 
               <div className="flex flex-col px-2 mt-3 gap-2">
                 <div className="flex flex-start">
+                  <Label className="text-muted-foreground">
+                    Travel Offices
+                  </Label>
+                </div>
+
+                <div className="flex flex-col space-y-4 my-3">
+                  {availableTravelOffices.length > 0 ? (
+                    availableTravelOffices.map((office, index) => (
+                      <div
+                        key={office}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <Checkbox
+                          className=""
+                          checked={selectedTravelOffices.includes(office)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTravelOffices((prev) =>
+                              checked
+                                ? [...prev, office]
+                                : prev.filter((o) => o !== office)
+                            );
+                          }}
+                          id={`office-${index}`}
+                        />
+                        <Label
+                          htmlFor={`office-${index}`}
+                          className="cursor-pointer text-gray-600"
+                        >
+                          {office}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No travel offices available
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Separator className="" />
+
+              <div className="flex flex-col px-2 mt-3 gap-2">
+                <div className="flex flex-start">
                   <Label className="text-muted-foreground">Airlines</Label>
                 </div>
 
@@ -1127,13 +1183,21 @@ const FlightSearchPage = () => {
                       <EmptyMedia variant="icon" className="text-blue-300">
                         <PlaneIcon />
                       </EmptyMedia>
-                      <EmptyTitle className="text-blue-400">No Flights Found</EmptyTitle>
+                      <EmptyTitle className="text-blue-400">
+                        No Flights Found
+                      </EmptyTitle>
                       <EmptyDescription className="text-muted-foreground text-xs">
-                        We couldn&apos;t find any flights matching your criteria.
+                        We couldn&apos;t find any flights matching your
+                        criteria.
                       </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
-                      <Button variant="outline" size="sm" className="mt-2 bg-white text-blue-400 hover:bg-blue-400 hover:text-white" onClick={searchFlights}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 bg-white text-blue-400 hover:bg-blue-400 hover:text-white"
+                        onClick={searchFlights}
+                      >
                         <RefreshCwIcon />
                         Refresh
                       </Button>

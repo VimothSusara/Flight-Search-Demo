@@ -1,0 +1,647 @@
+{
+  "search_metadata": {
+    "id": "68e93c7aacb3e4d5737d3449",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/46a7b596f2157fac/68e93c7aacb3e4d5737d3449.json",
+    "created_at": "2025-10-10 17:03:54 UTC",
+    "processed_at": "2025-10-10 17:03:54 UTC",
+    "google_flights_url": "https://www.google.com/travel/flights?hl=en&gl=us&curr=USD&tfs=CBwQAhoeEgoyMDI1LTEwLTExagcIARIDQ0RHcgcIARIDQVVTGh4SCjIwMjUtMTAtMTdqBwgBEgNBVVNyBwgBEgNDREdCAQFIAXABmAEB&tfu=EgIIAQ",
+    "raw_html_file": "https://serpapi.com/searches/46a7b596f2157fac/68e93c7aacb3e4d5737d3449.html",
+    "prettify_html_file": "https://serpapi.com/searches/46a7b596f2157fac/68e93c7aacb3e4d5737d3449.prettify",
+    "total_time_taken": 0.67
+  },
+  "search_parameters": {
+    "engine": "google_flights",
+    "hl": "en",
+    "gl": "us",
+    "departure_id": "CDG",
+    "arrival_id": "AUS",
+    "outbound_date": "2025-10-11",
+    "return_date": "2025-10-17",
+    "currency": "USD"
+  },
+  "best_flights": [
+    {
+      "travel_offices": [
+        { "name": "Mackinonns", "code": "MK001", "price": 1725 },
+        { "name": "DelAir", "code": "DA002", "price": 1699 },
+        { "name": "Riya", "code": "RY003", "price": 1742 },
+        { "name": "SkyHigh", "code": "SH004", "price": 1800 }
+      ],
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Paris Charles de Gaulle Airport",
+            "id": "CDG",
+            "time": "2025-10-11 11:00"
+          },
+          "arrival_airport": {
+            "name": "Dallas Fort Worth International Airport",
+            "id": "DFW",
+            "time": "2025-10-11 14:40"
+          },
+          "duration": 640,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 49",
+          "ticket_also_sold_by": ["Iberia"],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 489 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "Dallas Fort Worth International Airport",
+            "id": "DFW",
+            "time": "2025-10-11 18:33"
+          },
+          "arrival_airport": {
+            "name": "Austin-Bergstrom International Airport",
+            "id": "AUS",
+            "time": "2025-10-11 19:37"
+          },
+          "duration": 64,
+          "airplane": "Boeing 737",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 2767",
+          "ticket_also_sold_by": ["Iberia"],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 53 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 233,
+          "name": "Dallas Fort Worth International Airport",
+          "id": "DFW"
+        }
+      ],
+      "total_duration": 937,
+      "carbon_emissions": {
+        "this_flight": 543000,
+        "typical_for_this_route": 535000,
+        "difference_percent": 1
+      },
+      "price": 1660,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+      "extensions": [
+        "Checked baggage for a fee",
+        "Full refund for cancellations",
+        "Free change, possible fare difference",
+        "Bag and fare conditions depend on the return flight"
+      ],
+      "departure_token": "WyJDalJJTldsdlJWQkVNSEUwWDBWQlJGQkZiSGRDUnkwdExTMHRMUzB0TFMxMmQydGpOVUZCUVVGQlIycHdVRWh6UlVkVVR6QkJFZ3RCUVRRNWZFRkJNamMyTnhvTENNdVFDaEFDR2dOVlUwUTRISERMa0FvPSIsW1siQ0RHIiwiMjAyNS0xMC0xMSIsIkRGVyIsbnVsbCwiQUEiLCI0OSJdLFsiREZXIiwiMjAyNS0xMC0xMSIsIkFVUyIsbnVsbCwiQUEiLCIyNzY3Il1dXQ=="
+    },
+    {
+      "travel_offices": [
+        { "name": "Mackinonns", "code": "MK001", "price": 1708 },
+        { "name": "DelAir", "code": "DA002", "price": 1755 },
+        { "name": "Riya", "code": "RY003", "price": 1683 }
+      ],
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Paris Charles de Gaulle Airport",
+            "id": "CDG",
+            "time": "2025-10-11 10:15"
+          },
+          "arrival_airport": {
+            "name": "Amsterdam Airport Schiphol",
+            "id": "AMS",
+            "time": "2025-10-11 11:30"
+          },
+          "duration": 75,
+          "airplane": "Boeing 737",
+          "airline": "KLM",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/KL.png",
+          "travel_class": "Economy",
+          "flight_number": "KL 1406",
+          "ticket_also_sold_by": ["Delta"],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 50 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Amsterdam Airport Schiphol",
+            "id": "AMS",
+            "time": "2025-10-11 12:40"
+          },
+          "arrival_airport": {
+            "name": "Austin-Bergstrom International Airport",
+            "id": "AUS",
+            "time": "2025-10-11 16:00"
+          },
+          "duration": 620,
+          "airplane": "Boeing 787-10",
+          "airline": "KLM",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/KL.png",
+          "travel_class": "Economy",
+          "flight_number": "KL 667",
+          "ticket_also_sold_by": ["Delta"],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 406 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 70,
+          "name": "Amsterdam Airport Schiphol",
+          "id": "AMS"
+        }
+      ],
+      "total_duration": 765,
+      "carbon_emissions": {
+        "this_flight": 458000,
+        "typical_for_this_route": 535000,
+        "difference_percent": -14
+      },
+      "price": 1905,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/KL.png",
+      "extensions": [
+        "Checked baggage for a fee",
+        "Full refund for cancellations",
+        "Free change, possible fare difference",
+        "Bag and fare conditions depend on the return flight"
+      ],
+      "departure_token": "WyJDalJJTldsdlJWQkVNSEUwWDBWQlJGQkZiSGRDUnkwdExTMHRMUzB0TFMxMmQydGpOVUZCUVVGQlIycHdVRWh6UlVkVVR6QkJFZ3hMVERFME1EWjhTMHcyTmpjYUN3aU4wQXNRQWhvRFZWTkVPQnh3amRBTCIsW1siQ0RHIiwiMjAyNS0xMC0xMSIsIkFNUyIsbnVsbCwiS0wiLCIxNDA2Il0sWyJBTVMiLCIyMDI1LTEwLTExIiwiQVVTIixudWxsLCJLTCIsIjY2NyJdXV0="
+    },
+    {
+      "travel_offices": [
+        { "name": "Mackinonns", "code": "MK001", "price": 1732 },
+        { "name": "DelAir", "code": "DA002", "price": 1711 },
+        { "name": "Riya", "code": "RY003", "price": 1695 }
+      ],
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Paris Charles de Gaulle Airport",
+            "id": "CDG",
+            "time": "2025-10-11 14:10"
+          },
+          "arrival_airport": {
+            "name": "Montréal-Pierre Elliott Trudeau International Airport",
+            "id": "YUL",
+            "time": "2025-10-11 15:35"
+          },
+          "duration": 445,
+          "airplane": "Boeing 777",
+          "airline": "Air Canada",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AC.png",
+          "travel_class": "Economy",
+          "flight_number": "AC 871",
+          "ticket_also_sold_by": ["United", "Lufthansa", "Brussels Airlines"],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 363 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Montréal-Pierre Elliott Trudeau International Airport",
+            "id": "YUL",
+            "time": "2025-10-11 16:45"
+          },
+          "arrival_airport": {
+            "name": "Austin-Bergstrom International Airport",
+            "id": "AUS",
+            "time": "2025-10-11 19:55"
+          },
+          "duration": 250,
+          "airplane": "Airbus A220-300 Passenger",
+          "airline": "Air Canada",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AC.png",
+          "travel_class": "Economy",
+          "flight_number": "AC 1051",
+          "ticket_also_sold_by": ["United"],
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Free Wi-Fi",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 269 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 70,
+          "name": "Montréal-Pierre Elliott Trudeau International Airport",
+          "id": "YUL"
+        }
+      ],
+      "total_duration": 765,
+      "carbon_emissions": {
+        "this_flight": 632000,
+        "typical_for_this_route": 535000,
+        "difference_percent": 18
+      },
+      "price": 1910,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AC.png",
+      "extensions": [
+        "Checked baggage for a fee",
+        "Full refund for cancellations",
+        "Free change, possible fare difference",
+        "Bag and fare conditions depend on the return flight"
+      ],
+      "departure_token": "WyJDalJJTldsdlJWQkVNSEUwWDBWQlJGQkZiSGRDUnkwdExTMHRMUzB0TFMxMmQydGpOVUZCUVVGQlIycHdVRWh6UlVkVVR6QkJFZ3hCUXpnM01YeEJRekV3TlRFYUN3ajUwd3NRQWhvRFZWTkVPQnh3K2RNTCIsW1siQ0RHIiwiMjAyNS0xMC0xMSIsIllVTCIsbnVsbCwiQUMiLCI4NzEiXSxbIllVTCIsIjIwMjUtMTAtMTEiLCJBVVMiLG51bGwsIkFDIiwiMTA1MSJdXV0="
+    }
+  ],
+  "other_flights": [
+    {
+      "travel_offices": [
+        { "name": "Mackinonns", "code": "MK001", "price": 1702 },
+        { "name": "DelAir", "code": "DA002", "price": 1748 },
+        { "name": "Riya", "code": "RY003", "price": 1689 },
+        { "name": "SkyHigh", "code": "SH004", "price": 1800 }
+      ],
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Paris Charles de Gaulle Airport",
+            "id": "CDG",
+            "time": "2025-10-11 10:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2025-10-11 10:50"
+          },
+          "duration": 80,
+          "airplane": "Airbus A320",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 307",
+          "ticket_also_sold_by": ["American"],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 53 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2025-10-11 13:20"
+          },
+          "arrival_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2025-10-11 16:10"
+          },
+          "duration": 470,
+          "airplane": "Boeing 777",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 177",
+          "ticket_also_sold_by": ["American"],
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "On-demand video",
+            "Carbon emissions estimate: 296 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2025-10-11 21:15"
+          },
+          "arrival_airport": {
+            "name": "Austin-Bergstrom International Airport",
+            "id": "AUS",
+            "time": "2025-10-12 00:39"
+          },
+          "duration": 264,
+          "airplane": "Boeing 737",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 2772",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 213 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 150,
+          "name": "Heathrow Airport",
+          "id": "LHR"
+        },
+        {
+          "duration": 305,
+          "name": "John F. Kennedy International Airport",
+          "id": "JFK"
+        }
+      ],
+      "total_duration": 1269,
+      "carbon_emissions": {
+        "this_flight": 563000,
+        "typical_for_this_route": 535000,
+        "difference_percent": 5
+      },
+      "price": 1655,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "extensions": [
+        "Checked baggage for a fee",
+        "Full refund for cancellations",
+        "Free change, possible fare difference",
+        "Bag and fare conditions depend on the return flight"
+      ],
+      "departure_token": "WyJDalJJTldsdlJWQkVNSEUwWDBWQlJGQkZiSGRDUnkwdExTMHRMUzB0TFMxMmQydGpOVUZCUVVGQlIycHdVRWh6UlVkVVR6QkJFaEpDUVRNd04zeENRVEUzTjN4QlFUSTNOeklhQ3dpcmpBb1FBaG9EVlZORU9CeHdxNHdLIixbWyJDREciLCIyMDI1LTEwLTExIiwiTEhSIixudWxsLCJCQSIsIjMwNyJdLFsiTEhSIiwiMjAyNS0xMC0xMSIsIkpGSyIsbnVsbCwiQkEiLCIxNzciXSxbIkpGSyIsIjIwMjUtMTAtMTEiLCJBVVMiLG51bGwsIkFBIiwiMjc3MiJdXV0="
+    },
+    {
+      "travel_offices": [
+        { "name": "Mackinonns", "code": "MK001", "price": 1751 },
+        { "name": "DelAir", "code": "DA002", "price": 1692 },
+        { "name": "Riya", "code": "RY003", "price": 1728 },
+        { "name": "SkyHigh", "code": "SH004", "price": 1800 }
+      ],
+      "flights": [
+        {
+          "departure_airport": {
+            "name": "Paris Charles de Gaulle Airport",
+            "id": "CDG",
+            "time": "2025-10-11 10:30"
+          },
+          "arrival_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2025-10-11 10:50"
+          },
+          "duration": 80,
+          "airplane": "Airbus A320",
+          "airline": "British Airways",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/BA.png",
+          "travel_class": "Economy",
+          "flight_number": "BA 307",
+          "ticket_also_sold_by": ["American"],
+          "legroom": "29 in",
+          "extensions": [
+            "Below average legroom (29 in)",
+            "Wi-Fi for a fee",
+            "In-seat USB outlet",
+            "Carbon emissions estimate: 53 kg"
+          ],
+          "often_delayed_by_over_30_min": true
+        },
+        {
+          "departure_airport": {
+            "name": "Heathrow Airport",
+            "id": "LHR",
+            "time": "2025-10-11 14:10"
+          },
+          "arrival_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2025-10-11 17:05"
+          },
+          "duration": 475,
+          "airplane": "Boeing 777",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 105",
+          "legroom": "31 in",
+          "extensions": [
+            "Average legroom (31 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "On-demand video",
+            "Carbon emissions estimate: 334 kg"
+          ]
+        },
+        {
+          "departure_airport": {
+            "name": "John F. Kennedy International Airport",
+            "id": "JFK",
+            "time": "2025-10-11 21:15"
+          },
+          "arrival_airport": {
+            "name": "Austin-Bergstrom International Airport",
+            "id": "AUS",
+            "time": "2025-10-12 00:39"
+          },
+          "duration": 264,
+          "airplane": "Boeing 737",
+          "airline": "American",
+          "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/AA.png",
+          "travel_class": "Economy",
+          "flight_number": "AA 2772",
+          "legroom": "30 in",
+          "extensions": [
+            "Average legroom (30 in)",
+            "Wi-Fi for a fee",
+            "In-seat power & USB outlets",
+            "Stream media to your device",
+            "Carbon emissions estimate: 213 kg"
+          ]
+        }
+      ],
+      "layovers": [
+        {
+          "duration": 200,
+          "name": "Heathrow Airport",
+          "id": "LHR"
+        },
+        {
+          "duration": 250,
+          "name": "John F. Kennedy International Airport",
+          "id": "JFK"
+        }
+      ],
+      "total_duration": 1269,
+      "carbon_emissions": {
+        "this_flight": 601000,
+        "typical_for_this_route": 535000,
+        "difference_percent": 12
+      },
+      "price": 1655,
+      "type": "Round trip",
+      "airline_logo": "https://www.gstatic.com/flights/airline_logos/70px/multi.png",
+      "extensions": [
+        "Checked baggage for a fee",
+        "Full refund for cancellations",
+        "Free change, possible fare difference",
+        "Bag and fare conditions depend on the return flight"
+      ],
+      "departure_token": "WyJDalJJTldsdlJWQkVNSEUwWDBWQlJGQkZiSGRDUnkwdExTMHRMUzB0TFMxMmQydGpOVUZCUVVGQlIycHdVRWh6UlVkVVR6QkJFaEpDUVRNd04zeEJRVEV3Tlh4QlFUSTNOeklhQ3dpcmpBb1FBaG9EVlZORU9CeHdxNHdLIixbWyJDREciLCIyMDI1LTEwLTExIiwiTEhSIixudWxsLCJCQSIsIjMwNyJdLFsiTEhSIiwiMjAyNS0xMC0xMSIsIkpGSyIsbnVsbCwiQUEiLCIxMDUiXSxbIkpGSyIsIjIwMjUtMTAtMTEiLCJBVVMiLG51bGwsIkFBIiwiMjc3MiJdXV0="
+    }
+  ],
+  "price_insights": {
+    "lowest_price": 1655,
+    "price_level": "high",
+    "typical_price_range": [700, 1050],
+    "price_history": [
+      [1754863200, 814],
+      [1754949600, 818],
+      [1755036000, 781],
+      [1755122400, 785],
+      [1755208800, 787],
+      [1755295200, 791],
+      [1755381600, 795],
+      [1755468000, 795],
+      [1755554400, 795],
+      [1755640800, 792],
+      [1755727200, 790],
+      [1755813600, 791],
+      [1755900000, 789],
+      [1755986400, 796],
+      [1756072800, 784],
+      [1756159200, 782],
+      [1756245600, 724],
+      [1756332000, 726],
+      [1756418400, 726],
+      [1756504800, 729],
+      [1756591200, 729],
+      [1756677600, 729],
+      [1756764000, 731],
+      [1756850400, 730],
+      [1756936800, 725],
+      [1757023200, 727],
+      [1757109600, 727],
+      [1757196000, 731],
+      [1757282400, 738],
+      [1757368800, 738],
+      [1757455200, 741],
+      [1757541600, 799],
+      [1757628000, 799],
+      [1757714400, 802],
+      [1757800800, 802],
+      [1757887200, 836],
+      [1757973600, 843],
+      [1758060000, 928],
+      [1758146400, 936],
+      [1758232800, 929],
+      [1758319200, 683],
+      [1758405600, 683],
+      [1758492000, 683],
+      [1758578400, 686],
+      [1758664800, 687],
+      [1758751200, 706],
+      [1758837600, 708],
+      [1758924000, 928],
+      [1759010400, 928],
+      [1759096800, 1050],
+      [1759183200, 1013],
+      [1759269600, 1013],
+      [1759356000, 1001],
+      [1759442400, 999],
+      [1759528800, 1001],
+      [1759615200, 1077],
+      [1759701600, 1398],
+      [1759788000, 1394],
+      [1759874400, 1388],
+      [1759960800, 1385],
+      [1760047200, 1655]
+    ]
+  },
+  "airports": [
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "CDG",
+            "name": "Paris Charles de Gaulle Airport"
+          },
+          "city": "Paris",
+          "country": "France",
+          "country_code": "FR",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQGx8ii2KbSDdbdzfKye5oDN2bwBA6audqI7XUEf2iMRZezpn_ZbQe1ZIuvUSH-8XOMe958umDwSsAF1w",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSyQJ-woNs0iO22mPSkmRUM5gcsTbbYeypQ6BBTeFxXr90mqTxZl57Fdq2CDuLn4w7cKZ8TT9_zZhOpF57rIpA7yWKQnqKvkKIf9Y-qJDo"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "AUS",
+            "name": "Austin-Bergstrom International Airport"
+          },
+          "city": "Austin",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRKdjkMcBZuGRD1MjnuLQvdGtpTk0RyjdYs0Z8JsPtfIjer-6VvmfmMLxzvBkeyUrhf_focikfda4rVHg",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSQ73FSj9E8pKaNvjWKyEDQGfLV-pky_onARvOY-zHWvQ-hOuPJSqyyXzvyg4-kGGAcZxdO6T5SYGWBzrX8x6MSPq7gBHsSLzX9MYjFJWA"
+        }
+      ]
+    },
+    {
+      "departure": [
+        {
+          "airport": {
+            "id": "AUS",
+            "name": "Austin-Bergstrom International Airport"
+          },
+          "city": "Austin",
+          "country": "United States",
+          "country_code": "US",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRKdjkMcBZuGRD1MjnuLQvdGtpTk0RyjdYs0Z8JsPtfIjer-6VvmfmMLxzvBkeyUrhf_focikfda4rVHg",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSQ73FSj9E8pKaNvjWKyEDQGfLV-pky_onARvOY-zHWvQ-hOuPJSqyyXzvyg4-kGGAcZxdO6T5SYGWBzrX8x6MSPq7gBHsSLzX9MYjFJWA"
+        }
+      ],
+      "arrival": [
+        {
+          "airport": {
+            "id": "CDG",
+            "name": "Paris Charles de Gaulle Airport"
+          },
+          "city": "Paris",
+          "country": "France",
+          "country_code": "FR",
+          "image": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQGx8ii2KbSDdbdzfKye5oDN2bwBA6audqI7XUEf2iMRZezpn_ZbQe1ZIuvUSH-8XOMe958umDwSsAF1w",
+          "thumbnail": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSyQJ-woNs0iO22mPSkmRUM5gcsTbbYeypQ6BBTeFxXr90mqTxZl57Fdq2CDuLn4w7cKZ8TT9_zZhOpF57rIpA7yWKQnqKvkKIf9Y-qJDo"
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mockData from './mockData.json';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -60,13 +61,14 @@ export async function GET(request: NextRequest) {
     const url = process.env.SERPAPI_URL
 
     try {
-        const response = await fetch(`${url}?${params}`)
+        // const response = await fetch(`${url}?${params}`)
+        const response = mockData;
 
-        const data = await response.json()
+        const data = response;
 
-        if (data.error) {
-            return NextResponse.json({ error: data.error }, { status: 400 })
-        }
+        // if (data.error) {
+        //     return NextResponse.json({ error: data.error }, { status: 400 })
+        // }
 
         const flights_data = [
             ...(data.best_flights || []),

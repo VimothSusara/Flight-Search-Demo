@@ -26,6 +26,12 @@ const formatTime = (timeString: string) => {
 const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
+  const sortedOffices =
+    parent_flight.travel_offices && parent_flight.travel_offices.length > 0
+      ? [...parent_flight.travel_offices]
+          .sort((a, b) => a.price - b.price)
+          .slice(0, 3)
+      : [];
 
   return (
     <>
@@ -72,12 +78,12 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
                         <Image
                           src={flight.airline_logo}
                           alt="flight logo"
-                          width={34}
-                          height={34}
+                          width={24}
+                          height={24}
                           style={{ objectFit: "contain" }}
                           unoptimized={true}
                         />
-                        <span className="text-gray-600 font-semibold">
+                        <span className="text-gray-600 font-semibold text-sm">
                           {flight.airline}
                         </span>
                       </div>
@@ -91,16 +97,44 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
             </div>
 
             {/* Right side: narrower */}
-            <div className="hidden w-32 md:flex flex-col items-center justify-center p-2 border-l">
-              <Label>
-                <span className="font-semibold text-xl text-gray-600">
-                  ${parent_flight.price}
-                </span>
-              </Label>
-              <Button className="mt-4 w-full" variant="secondary" size="sm">
-                View Details
-              </Button>
-              {/* You can add more layover details here */}
+            <div className="hidden w-32 md:flex flex-col items-center justify-center border-l text-center">
+              {sortedOffices.length > 0 ? (
+                <>
+                  {sortedOffices.map((office, idx) => (
+                    <div key={idx} className="flex flex-col items-center space-y-1 mb-2">
+                      <Label>
+                        <span className="font-semibold text-center text-blue-400">
+                          {office.name}
+                        </span>
+                      </Label>
+                      <p className="text-sm text-gray-500 font-semibold">
+                        ${office.price.toFixed(2)}
+                      </p>
+                      {idx < sortedOffices.length - 1 && (
+                        <Separator className="my-1" />
+                      )}
+                    </div>
+                  ))}
+
+                  {parent_flight.travel_offices &&
+                    parent_flight.travel_offices.length > 3 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        +{parent_flight.travel_offices.length - 3} more options
+                      </p>
+                    )}
+                </>
+              ) : (
+                <>
+                  <Label>
+                    <span className="font-semibold text-xl text-gray-600">
+                      ${parent_flight.price}
+                    </span>
+                  </Label>
+                  <Button className="mt-4 w-full" variant="secondary" size="sm">
+                    View Details
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </CardContent>
