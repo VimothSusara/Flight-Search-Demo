@@ -15,11 +15,13 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleWarningIcon } from "lucide-react";
 
-const formatDuration = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h ${mins}m`;
-};
+function formatDuration(duration) {
+  if (!duration) return "";
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  const hours = match?.[1] ? `${match[1]}h` : "";
+  const minutes = match?.[2] ? ` ${match[2]}m` : "";
+  return `${hours}${minutes}`.trim();
+}
 
 const formatTime = (timeString: string) => {
   try {
@@ -135,7 +137,10 @@ const FlightDetailModal = ({
 
             {parent_flight.layovers && parent_flight.layovers.length > 0 && (
               <div className="my-2">
-                <Alert variant="default" className="bg-yellow-50 text-amber-600 border-amber-200">
+                <Alert
+                  variant="default"
+                  className="bg-yellow-50 text-amber-600 border-amber-200"
+                >
                   <MessageCircleWarningIcon />
                   <AlertTitle>Heads up!</AlertTitle>
                   <AlertDescription>

@@ -928,6 +928,7 @@ const FlightSearchPage = () => {
               type="button"
               className="w-full md:w-1/6 mx-auto cursor-pointer my-2 bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-500 hover:text-white transition-colors duration-300 rounded-sm"
               onClick={searchFlights}
+              disabled={loading}
             >
               <Search className="mr-2" />
               Search Flights
@@ -952,7 +953,7 @@ const FlightSearchPage = () => {
           )} */}
 
           {/* Search Results */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:w-4/5 h-full mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:w-3/4 h-full mx-auto">
             <div className="hidden md:col-span-1 border shadow md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar px-2 py-4">
               <div className="h-16 border-b flex justify-between items-center">
                 <Label

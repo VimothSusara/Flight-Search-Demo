@@ -1,35 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mockData from './mockData.json';
+import { searchAmadeusFlights } from "@/lib/amadeus";
+
+function transformAmadeusToSerpSchema(amadeusResponse: any) {
+    const carriers = amadeusResponse.dictionaries.carriers;
+    const aircrafts = amadeusResponse.dictionaries.aircraft;
+
+    return amadeusResponse.data.map((offer: any) => {
+        const airlineCode = offer.validatingAirlineCodes[0];
+        const airlineName = carriers[airlineCode];
+        const totalPrice = parseFloat(offer.price.total);
+
+        const allSegments = offer.itineraries.flatMap((itin: any) =>
+            itin.segments.map((seg: any) => ({
+                departure_airport: {
+                    name: seg.departure.iataCode,
+                    id: seg.departure.iataCode,
+                    time: seg.departure.at,
+                },
+                arrival_airport: {
+                    name: seg.arrival.iataCode,
+                    id: seg.arrival.iataCode,
+                    time: seg.arrival.at,
+                },
+                duration: seg.duration,
+                airplane: aircrafts[seg.aircraft.code],
+                airline: carriers[seg.carrierCode],
+                airline_logo: "", // Optional: you can map to airline logos later
+                travel_class: seg.cabin,
+                flight_number: `${seg.carrierCode}${seg.number}`,
+                legroom: "standard",
+                extensions: [],
+            }))
+        );
+
+        return {
+            flights: allSegments,
+            total_duration: offer.itineraries.reduce((sum: number, itin: any) => {
+                const match = itin.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+                const hours = match?.[1] ? parseInt(match[1]) : 0;
+                const mins = match?.[2] ? parseInt(match[2]) : 0;
+                return sum + hours * 60 + mins;
+            }, 0),
+            carbon_emissions: {
+                this_flight: 0,
+                typical_for_this_route: 0,
+                difference_percent: 0,
+            },
+            price: totalPrice,
+            type: "amadeus",
+            airline_logo: "",
+            extensions: [],
+            booking_token: offer.id,
+        };
+    });
+}
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
-    const departure_id = searchParams.get("departure");
-    const arrival_id = searchParams.get("arrival");
+    const origin = searchParams.get("departure");
+    const destination = searchParams.get("arrival");
     const outbound_date = searchParams.get("outbound_date");
     const return_date = searchParams.get("return_date");
     const currency = searchParams.get("currency") || "USD";
-    const type = searchParams.get("type") || "1"; // Default to round-trip (2), as per SerpApi convention
-    const engine = searchParams.get("engine") || "google_flights";
-    const hl = searchParams.get("hl") || "en";
-    const gl = searchParams.get("gl") || "us";
+    const adults = searchParams.get("adults") || "1";
+    const travel_class = searchParams.get("travel_class") || "ECONOMY";
 
-    // Optional parameters
-    const travel_class = searchParams.get("travel_class");
-    const adults = searchParams.get("adults");
-    const children = searchParams.get("children");
-    const infants_in_seat = searchParams.get("infants_in_seat");
-    const infants_on_lap = searchParams.get("infants_on_lap");
-    const stops = searchParams.get("stops");
-    const emissions = searchParams.get("emissions");
-
-    if (!departure_id || !arrival_id) {
-        return NextResponse.json({ error: "Missing departure or arrival" }, { status: 400 });
-    }
-    if (!outbound_date) {
-        return NextResponse.json({ error: "Missing outbound date" }, { status: 400 });
-    }
-    if (type === "1" && !return_date) {
-        return NextResponse.json({ error: "Missing return date for round-trip" }, { status: 400 });
+    if (!origin || !destination || !outbound_date) {
+        return NextResponse.json({ error: "Missing required params" }, { status: 400 });
     }
 
     const api_key = process.env.SERPAPI_KEY;
@@ -37,53 +74,31 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "API key not found" }, { status: 500 });
     }
 
-    const params = new URLSearchParams({
-        api_key,
-        engine,
-        hl,
-        gl,
-        departure_id,
-        arrival_id,
-        outbound_date,
-        currency,
-    });
-
-    if (return_date) params.append("return_date", return_date);
-    if (type) params.append("type", type);
-    if (travel_class) params.append("travel_class", travel_class);
-    if (adults) params.append("adults", adults);
-    if (children) params.append("children", children);
-    if (infants_in_seat) params.append("infants_in_seat", infants_in_seat);
-    if (infants_on_lap) params.append("infants_on_lap", infants_on_lap);
-    if (stops) params.append("stops", stops);
-    if (emissions) params.append("emissions", emissions);
-
-    const url = process.env.SERPAPI_URL
-
     try {
-        // const response = await fetch(`${url}?${params}`)
-        const response = mockData;
+        const amadeusData = await searchAmadeusFlights({
+            originLocationCode: 'PAR',
+            destinationLocationCode: 'ICN',
+            departureDate: '2025-10-31',
+            returnDate: '2025-11-14',
+            adults: '2',
+            max: "5",
+            
+        });
 
-        const data = response;
-
-        // if (data.error) {
-        //     return NextResponse.json({ error: data.error }, { status: 400 })
-        // }
-
-        const flights_data = [
-            ...(data.best_flights || []),
-            ...(data.other_flights || []),
-        ];
+        const flights_data = transformAmadeusToSerpSchema(amadeusData);
 
         return NextResponse.json({
             flights_data,
-            metadata: data.search_metadata,
-            search_parameters: data.search_parameters,
-            price_insights: data.price_insights,
-            airports: data.airports,
-        })
-    } catch (err) {
-        return NextResponse.json({ error: err || 'Something went wrong' }, { status: 500 })
+            metadata: { source: "amadeus" },
+            price_insights: null,
+            airports: [],
+        });
+    } catch (err: any) {
+        console.error("Amadeus error:", err.response?.data || err.message);
+        return NextResponse.json(
+            { error: "Failed to fetch flights" },
+            { status: 500 }
+        );
     }
 
 }

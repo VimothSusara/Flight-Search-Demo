@@ -8,16 +8,19 @@ import { Button } from "./ui/button";
 import FlightDetailModal from "./FlightDetailModal";
 import { Separator } from "./ui/separator";
 
-const formatDuration = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h ${mins}m`;
-};
+function formatDuration(duration: string) {
+  if (!duration) return "";
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  const hours = match?.[1] ? `${match[1]}h` : "";
+  const minutes = match?.[2] ? ` ${match[2]}m` : "";
+  return `${hours}${minutes}`.trim();
+}
 
+// 2025-10-31T12:30:00 -> 2025-10-31, 12:30 PM
 const formatTime = (timeString: string) => {
   try {
-    const date = parse(timeString, "yyyy-MM-dd HH:mm", new Date());
-    return format(date, "h:mm a");
+    const date = parse(timeString, "yyyy-MM-dd'T'HH:mm:ss", new Date());
+    return format(date, "yyyy-MM-dd, h:mm a");
   } catch (error) {
     return timeString;
   }
@@ -51,30 +54,30 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex flex-col">
                         <p className="flex flex-col gap-2 justify-center items-center">
-                          <span className="font-semibold">
+                          <span className="font-semibold text-blue-600">
                             {formatTime(flight.departure_airport.time)}
                           </span>
-                          <span className="text-muted-foreground">
+                          <span className="text-blue-300">
                             {flight.departure_airport.id}
                           </span>
                         </p>
                       </div>
                       <div className="flex flex-col items-center">
                         <p className="text-muted-foreground">
-                          {formatDuration(flight.duration)}
+                          {formatDuration(flight.duration.toString())}
                         </p>
                       </div>
                       <div className="flex flex-col items-center">
                         <p className="flex flex-col gap-2 justify-center items-center">
-                          <span className="font-semibold">
+                          <span className="font-semibold text-blue-600">
                             {formatTime(flight.arrival_airport.time)}
                           </span>
-                          <span className="text-muted-foreground">
+                          <span className="text-blue-300">
                             {flight.arrival_airport.id}
                           </span>
                         </p>
                       </div>
-                      <div className="flex flex-col items-center">
+                      {/* <div className="flex flex-col items-center">
                         <Image
                           src={flight.airline_logo}
                           alt="flight logo"
@@ -86,7 +89,7 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
                         <span className="text-gray-600 font-semibold text-sm">
                           {flight.airline}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   {index < parent_flight.flights.length - 1 && (
@@ -101,7 +104,10 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
               {sortedOffices.length > 0 ? (
                 <>
                   {sortedOffices.map((office, idx) => (
-                    <div key={idx} className="flex flex-col items-center space-y-1 mb-2">
+                    <div
+                      key={idx}
+                      className="flex flex-col items-center space-y-1 mb-2"
+                    >
                       <Label>
                         <span className="font-semibold text-center text-blue-400">
                           {office.name}
