@@ -1,7 +1,7 @@
 // lib/amadeus.ts
 import axios from "axios";
 
-const AMADEUS_API = process.env.AMADEUS_API_URL!;
+const AMADEUS_API = process.env.AMADEUS_API_URL || "https://test.api.amadeus.com";
 
 export async function getAccessToken() {
   const { data } = await axios.post(
