@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Flight } from "@/app/search/page";
-import Image from "next/image";
 import { format, parse } from "date-fns";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
@@ -22,6 +21,7 @@ const formatTime = (timeString: string) => {
     const date = parse(timeString, "yyyy-MM-dd'T'HH:mm:ss", new Date());
     return format(date, "yyyy-MM-dd, h:mm a");
   } catch (error) {
+    console.error("Error formatting time:", error);
     return timeString;
   }
 };
@@ -41,6 +41,7 @@ const FlightCard = ({ parent_flight }: { parent_flight: Flight }) => {
       <Card
         className="w-full py-2 m-0 shadow-sm hover:shadow-lg transition-shadow"
         onClick={(e) => {
+          e.preventDefault();
           setIsModalOpen(true);
         }}
       >

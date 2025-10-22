@@ -5,7 +5,6 @@ import {
   CalendarIcon,
   Check,
   ChevronDownIcon,
-  InfoIcon,
   PlaneIcon,
   RefreshCwIcon,
   Search,
@@ -843,7 +842,7 @@ const FlightSearchPage = () => {
                       <Button
                         variant="outline"
                         data-empty={!outboundDate}
-                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal w-full"
+                        className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full"
                         size="lg"
                       >
                         <div className="flex items-center space-x-2">
@@ -888,7 +887,7 @@ const FlightSearchPage = () => {
                       <Button
                         variant="outline"
                         data-empty={!returnDate}
-                        className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal w-full"
+                        className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full"
                         size="lg"
                       >
                         <div className="flex items-center space-x-2">

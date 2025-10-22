@@ -2,7 +2,6 @@ import React from "react";
 import { Flight } from "@/app/search/page";
 import Image from "next/image";
 import { format, parse } from "date-fns";
-import { Label } from "./ui/label";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import {
@@ -15,7 +14,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { MessageCircleWarningIcon } from "lucide-react";
 
-function formatDuration(duration) {
+function formatDuration(duration: string) {
   if (!duration) return "";
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
   const hours = match?.[1] ? `${match[1]}h` : "";
@@ -84,7 +83,7 @@ const FlightDetailModal = ({
                     </div>
                     <div className="flex flex-col items-center">
                       <p className="text-muted-foreground">
-                        {formatDuration(flight.duration)}
+                        {formatDuration(flight.duration.toString())}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {formatTime(flight.arrival_airport.time)}
@@ -127,7 +126,7 @@ const FlightDetailModal = ({
                         Duration
                       </span>
                       <p className="text-sm text-gray-600">
-                        {formatDuration(flight.duration)}
+                        {formatDuration(flight.duration.toString())}
                       </p>
                     </div>
                   </div>
@@ -156,7 +155,8 @@ const FlightDetailModal = ({
                       <div key={idx} className="text-xs text-yellow-600">
                         <p>
                           <span className="font-semibold">{layover.id}</span>:{" "}
-                          {formatDuration(layover.duration)} minutes layover
+                          {formatDuration(layover.duration.toString())} minutes
+                          layover
                         </p>
                       </div>
                     ))}

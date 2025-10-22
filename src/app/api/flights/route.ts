@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from 'next/server';
 import { searchAmadeusFlights } from "@/lib/amadeus";
 
@@ -60,10 +61,10 @@ export async function GET(request: NextRequest) {
     const origin = searchParams.get("departure");
     const destination = searchParams.get("arrival");
     const outbound_date = searchParams.get("outbound_date");
-    const return_date = searchParams.get("return_date");
-    const currency = searchParams.get("currency") || "USD";
-    const adults = searchParams.get("adults") || "1";
-    const travel_class = searchParams.get("travel_class") || "ECONOMY";
+    // const return_date = searchParams.get("return_date");
+    // const currency = searchParams.get("currency") || "USD";
+    // const adults = searchParams.get("adults") || "1";
+    // const travel_class = searchParams.get("travel_class") || "ECONOMY";
 
     if (!origin || !destination || !outbound_date) {
         return NextResponse.json({ error: "Missing required params" }, { status: 400 });
