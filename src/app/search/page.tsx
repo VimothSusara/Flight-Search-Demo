@@ -1,14 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  CalendarIcon,
-  Check,
-  ChevronDownIcon,
-  PlaneIcon,
-  RefreshCwIcon,
-  Search,
-} from "lucide-react";
+import { CalendarIcon, Check, ChevronDownIcon, RefreshCwIcon, Search } from "lucide-react";
 import React from "react";
 import {
   Command,
@@ -44,14 +37,7 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -74,6 +60,14 @@ const airports = [
     value: "AUS",
     label: "Austin",
   },
+  {
+    value: "CMB",
+    label: "Colombo Bandaranaike",
+  },
+  {
+    value: "DXB",
+    label: "Dubai International",
+  },
 ];
 
 interface FlightSearchParams {
@@ -90,21 +84,36 @@ interface FlightSearchParams {
   infants_on_lap?: string;
   stops?: string;
   emissions?: string;
+  maxPrice?: string;
+  travelClass?: string;
+  includedAirlineCodes?: string;
+  excludedAirlineCodes?: string;
+  nonStop?: string;
+  currencyCode?: string;
+  max?: string;
+}
+
+export interface PriceOption {
+  provider: string; // "Amadeus", "Skyscanner", etc.
+  price: number;
+  bookingUrl?: string;
+  currency?: string;
 }
 
 export interface Flight {
+  id: string;
   flights: {
     departure_airport: { name: string; id: string; time: string };
     arrival_airport: { name: string; id: string; time: string };
-    duration: number;
-    airplane: string;
+    duration: string;
+    airplane?: string;
     airline: string;
-    airline_logo: string;
-    travel_class: string;
+    airline_logo?: string;
+    travel_class?: string;
     flight_number: string;
     ticket_also_sold_by?: string[];
-    legroom: string;
-    extensions: string[];
+    legroom?: string;
+    extensions?: string[];
     often_delayed_by_over_30_min?: boolean;
   }[];
   layovers?: { duration: number; name: string; id: string }[];
@@ -114,20 +123,16 @@ export interface Flight {
     typical_for_this_route: number;
     difference_percent: number;
   };
-  price: number;
+  priceOptions: PriceOption[]; // Multiple prices from different providers
+  lowestPrice: number; // Lowest price among all providers
   type: string;
-  airline_logo: string;
-  extensions: string[];
-  booking_token: string;
+  airline_logo?: string;
+  extensions?: string[];
+  booking_token?: string;
   travel_offices?: { name: string; code: string; price: number }[];
+  apiRaw?: unknown; // Raw API response for modal details
 }
 
-interface PriceInsights {
-  lowest_price: number;
-  price_level: string;
-  typical_price_range: [number, number];
-  price_history: [number, number][];
-}
 
 const FlightCardSkeleton = () => (
   <div className="w-full">
@@ -186,8 +191,7 @@ const FlightSearchPage = () => {
   };
 
   const [flights, setFlights] = React.useState<Flight[]>([]);
-  const [priceInsights, setPriceInsights] =
-    React.useState<PriceInsights | null>(null);
+  // const [priceInsights, setPriceInsights] = React.useState<PriceInsights | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [searchParams, setSearchParams] = React.useState<FlightSearchParams>({
@@ -201,9 +205,7 @@ const FlightSearchPage = () => {
   });
   const [departure, setDeparture] = React.useState("");
   const [arrival, setArrival] = React.useState("");
-  const [outboundDate, setOutboundDate] = React.useState<Date | undefined>(
-    getTomorrow()
-  );
+  const [outboundDate] = React.useState<Date | undefined>(getTomorrow());
   const [returnDate, setReturnDate] = React.useState<Date | undefined>(
     getDayAfterTomorrow()
   );
@@ -213,6 +215,7 @@ const FlightSearchPage = () => {
   const [selectedArrivalAirports, setSelectedArrivalAirports] = React.useState<
     string[]
   >([]);
+  // 1 = roundtrip, 2 = oneway (match backend)
   const [selectedFlightType, setSelectedFlightType] = React.useState<number>(1);
   const [selectedTravelClass, setSelectedTravelClass] =
     React.useState<number>(1);
@@ -240,28 +243,29 @@ const FlightSearchPage = () => {
     setLoading(true);
     setError(null);
 
+    // Map travel class selection to Amadeus param
+    let travelClassValue = "ECONOMY";
+    if (selectedTravelClass === 2) travelClassValue = "PREMIUM_ECONOMY";
+    if (selectedTravelClass === 3) travelClassValue = "BUSINESS";
+    if (selectedTravelClass === 4) travelClassValue = "FIRST";
+
+    // Map stops selection to nonStop param
+    let nonStopValue = "false";
+    if (selectedFlightStops === 1) nonStopValue = "true";
+
     const query = new URLSearchParams({
-      departure: searchParams.departure,
-      arrival: searchParams.arrival,
-      currency: searchParams.currency,
-      outbound_date: format(outboundDate, "yyyy-MM-dd"),
-      type: searchParams.type,
+      originLocationCode: searchParams.departure,
+      destinationLocationCode: searchParams.arrival,
+      departureDate: format(outboundDate, "yyyy-MM-dd"),
       ...(searchParams.return_date && {
-        return_date: format(returnDate || outboundDate, "yyyy-MM-dd"),
+        returnDate: format(returnDate || outboundDate, "yyyy-MM-dd"),
       }),
-      ...(searchParams.travel_class && {
-        travel_class: searchParams.travel_class,
-      }),
-      ...(searchParams.adults && { adults: searchParams.adults }),
+      adults: searchParams.adults || "1",
       ...(searchParams.children && { children: searchParams.children }),
-      ...(searchParams.infants_in_seat && {
-        infants_in_seat: searchParams.infants_in_seat,
-      }),
-      ...(searchParams.infants_on_lap && {
-        infants_on_lap: searchParams.infants_on_lap,
-      }),
-      ...(searchParams.stops && { stops: searchParams.stops }),
-      ...(searchParams.emissions && { emissions: searchParams.emissions }),
+      ...(searchParams.infants_in_seat && { infants: searchParams.infants_in_seat }),
+      travelClass: travelClassValue,
+      nonStop: nonStopValue,
+      max: "250",
     }).toString();
 
     try {
@@ -274,10 +278,10 @@ const FlightSearchPage = () => {
       if (data.error) {
         setError(data.error);
         setFlights([]);
-        setPriceInsights(null);
+  // setPriceInsights(null);
       } else {
         setFlights(data.flights_data || []);
-        setPriceInsights(data.price_insights || null);
+  // setPriceInsights(data.price_insights || null);
 
         // if (data.flights_data) {
         //   // Auto-select airlines
@@ -298,19 +302,21 @@ const FlightSearchPage = () => {
         //   setSelectedArrivalAirports(Array.from(arrivalAirports));
         // }
 
+        // Show warning if only one-way flights returned for round-trip search
         if (
-          searchParams.type === "1" &&
-          data.flights_data.every((f: Flight) => f.type === "One way")
+          selectedFlightType === 1 &&
+          data.flights_data.length > 0 &&
+          data.flights_data.every((f: Flight) => f.type === "oneway")
         ) {
           setError(
             "Note: Only one-way flights returned for round-trip search."
           );
         }
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch flights. Please try again.");
       setFlights([]);
-      setPriceInsights(null);
+      // setPriceInsights(null);
     } finally {
       setLoading(false);
     }
@@ -352,13 +358,13 @@ const FlightSearchPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50" style={{}}>
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200">
         <Header />
 
-        <main className="w-full mx-auto flex flex-col gap-4">
+        <main className="w-full mx-auto flex flex-col gap-8">
           {/* search section */}
           <div
-            className="flex flex-col w-full lg:w-4/5 mx-auto gap-1 rounded-none bg-white shadow-md"
+            className="flex flex-col w-full lg:w-3/5 mx-auto gap-6 rounded-2xl bg-white/80 shadow-2xl p-8 border border-blue-100 backdrop-blur-md"
             style={{
               marginTop: "-5.5rem",
               zIndex: 40,
@@ -366,7 +372,7 @@ const FlightSearchPage = () => {
               background: "transparent",
             }}
           >
-            <div className="flex">
+            <div className="flex gap-4 justify-between items-center">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -389,9 +395,12 @@ const FlightSearchPage = () => {
                           Flight Type
                         </FieldLabel>
                         <RadioGroup
-                          defaultValue="1"
                           onValueChange={(value) => {
                             setSelectedFlightType(parseInt(value));
+                            setSearchParams((prev) => ({
+                              ...prev,
+                              type: value,
+                            }));
                           }}
                         >
                           <FieldLabel htmlFor="round_trip-r2h">
@@ -602,7 +611,7 @@ const FlightSearchPage = () => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium text-blue-600">Infants</p>
-                        <p className="text-sm text-gray-300">Age 0–23</p>
+                        <p className="text-sm text-gray-300">Age less than 2</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -726,8 +735,8 @@ const FlightSearchPage = () => {
               </Popover>
             </div>
 
-            <div className="space-y-2">
-              <div className="grid grid-cols-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-2 lg:col-span-1">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -925,7 +934,7 @@ const FlightSearchPage = () => {
             </div>
             <Button
               type="button"
-              className="w-full md:w-1/6 mx-auto cursor-pointer my-2 bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-500 hover:text-white transition-colors duration-300 rounded-sm"
+              className="w-full md:w-1/4 mx-auto cursor-pointer my-4 bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold shadow-lg hover:from-blue-600 hover:to-blue-500 transition-all duration-300 rounded-xl py-3 text-lg"
               onClick={searchFlights}
               disabled={loading}
             >
@@ -952,26 +961,15 @@ const FlightSearchPage = () => {
           )} */}
 
           {/* Search Results */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full md:w-3/4 h-full mx-auto">
-            <div className="hidden md:col-span-1 border shadow md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar px-2 py-4">
-              <div className="h-16 border-b flex justify-between items-center">
-                <Label
-                  htmlFor="sort"
-                  className=" font-semibold text-muted-foreground px-2"
-                >
-                  Sort by
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full md:w-3/4 h-full mx-auto">
+            <div className="hidden md:col-span-1 border shadow-lg md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar px-4 py-6 rounded-2xl bg-white/80 backdrop-blur-md transition-all duration-300">
+              <div className="h-16 border-b flex justify-between items-center bg-gradient-to-r from-blue-50 to-white rounded-t-2xl px-2">
+                <Label htmlFor="sort" className="font-bold text-blue-600 px-2 text-lg flex items-center gap-2">
+                 Sort by
                 </Label>
-
                 <Select>
-                  <SelectTrigger
-                    className="w-32 mr-2 mt-2 mb-2"
-                    size="sm"
-                    defaultValue="1"
-                  >
-                    <SelectValue
-                      placeholder="Select..."
-                      className="bg-transparent"
-                    />
+                  <SelectTrigger className="w-32 mr-2 mt-2 mb-2" size="sm" defaultValue="1">
+                    <SelectValue placeholder="Select..." className="bg-transparent" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1">Top Flights</SelectItem>
@@ -983,26 +981,24 @@ const FlightSearchPage = () => {
                 </Select>
               </div>
 
-              <Separator className="" />
-
+              <Separator className="my-2" />
               <div className="flex justify-between px-2 my-3">
-                <Label className="text-muted-foreground">Filters</Label>
-
-                <Label className="cursor-pointer text-xs font-normal">
+                <Label className="text-blue-500 font-bold flex items-center gap-2">
+                  Filters
+                </Label>
+                <Label className="cursor-pointer text-xs font-normal text-blue-400">
                   {flights.length} results
                 </Label>
               </div>
+              <Separator className="my-2" />
 
-              <Separator className="" />
-
-              <div className="flex flex-col px-2 mt-3 gap-2">
-                <div className="flex flex-start">
-                  <Label className="text-muted-foreground">
-                    Travel Offices
-                  </Label>
+              <div className="flex flex-col px-2 mt-3 gap-4">
+                <div className="flex flex-start items-center gap-2">
+                  <span>🏢</span>
+                  <Label className="text-blue-600 font-semibold">Travel Offices</Label>
                 </div>
 
-                <div className="flex flex-col space-y-4 my-3">
+                <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
                   {availableTravelOffices.length > 0 ? (
                     availableTravelOffices.map((office, index) => (
                       <div
@@ -1037,14 +1033,15 @@ const FlightSearchPage = () => {
                 </div>
               </div>
 
-              <Separator className="" />
+              <Separator className="my-2" />
 
-              <div className="flex flex-col px-2 mt-3 gap-2">
-                <div className="flex flex-start">
-                  <Label className="text-muted-foreground">Airlines</Label>
+              <div className="flex flex-col px-2 mt-3 gap-4">
+                <div className="flex flex-start items-center gap-2">
+                  <span>✈️</span>
+                  <Label className="text-blue-600 font-semibold">Airlines</Label>
                 </div>
 
-                <div className="flex flex-col space-y-4 my-3">
+                <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
                   {availableAirlines.length > 0 ? (
                     availableAirlines.map((airline, index) => (
                       <div
@@ -1079,16 +1076,15 @@ const FlightSearchPage = () => {
                 </div>
               </div>
 
-              <Separator className="" />
+              <Separator className="my-2" />
 
-              <div className="flex flex-col px-2 mt-3 gap-2">
-                <div className="flex flex-start">
-                  <Label className="text-muted-foreground">
-                    Departure Airports
-                  </Label>
+              <div className="flex flex-col px-2 mt-3 gap-4">
+                <div className="flex flex-start items-center gap-2">
+                  <span>🛫</span>
+                  <Label className="text-blue-600 font-semibold">Departure Airports</Label>
                 </div>
 
-                <div className="flex flex-col space-y-4 my-3">
+                <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
                   {availableDepartureAirports.length > 0 ? (
                     availableDepartureAirports.map((airport, index) => (
                       <div
@@ -1123,16 +1119,15 @@ const FlightSearchPage = () => {
                 </div>
               </div>
 
-              <Separator className="" />
+              <Separator className="my-2" />
 
-              <div className="flex flex-col px-2 mt-3 gap-2">
-                <div className="flex flex-start">
-                  <Label className="text-muted-foreground">
-                    Arrival Airports
-                  </Label>
+              <div className="flex flex-col px-2 mt-3 gap-4">
+                <div className="flex flex-start items-center gap-2">
+                  <span>🛬</span>
+                  <Label className="text-blue-600 font-semibold">Arrival Airports</Label>
                 </div>
 
-                <div className="flex flex-col space-y-4 my-3">
+                <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
                   {availableArrivalAirports.length > 0 ? (
                     availableArrivalAirports.map((airport, index) => (
                       <div
@@ -1167,7 +1162,7 @@ const FlightSearchPage = () => {
                 </div>
               </div>
 
-              <Separator className="" />
+              <Separator className="my-2" />
             </div>
             <div className="col-span-1 md:col-span-3 border-none">
               {loading && (
@@ -1178,19 +1173,35 @@ const FlightSearchPage = () => {
                 </div>
               )}
               {error && <p className="text-red-500">{error}</p>}
-              {!loading && !error && flights.length === 0 && (
-                <div className="items-center">
-                  <Empty className="from-muted/50 to-background h-full bg-gradient-to-b from-30%">
+              {!loading && !error && flights.length > 0 && (
+                <div className="grid gap-4">
+                  {flights
+                    .filter((flight) => {
+                      // Only show roundtrip flights if roundtrip is selected
+                      if (selectedFlightType === 1) {
+                        // Accept both .type and .oneWay for roundtrip
+                        return flight.type === "roundtrip" || (flight as unknown as { oneWay?: boolean }).oneWay === false;
+                      }
+                      // Only show oneway flights if oneway is selected
+                      if (selectedFlightType === 2) {
+                        return flight.type === "oneway" || (flight as unknown as { oneWay?: boolean }).oneWay === true;
+                      }
+                      return true;
+                    })
+                    .map((flight, index) => (
+                      <div key={index} className="w-full px-3 py-2">
+                        <FlightCard parent_flight={flight} />
+                      </div>
+                    ))}
+                </div>
+              )}
+                {/* Show Empty state if no flights found and not loading or error */}
+                {!loading && !error && flights.length === 0 && (
+                  <Empty>
                     <EmptyHeader>
-                      <EmptyMedia variant="icon" className="text-blue-300">
-                        <PlaneIcon />
-                      </EmptyMedia>
-                      <EmptyTitle className="text-blue-400">
-                        No Flights Found
-                      </EmptyTitle>
+                      <EmptyTitle>No Flights Found</EmptyTitle>
                       <EmptyDescription className="text-muted-foreground text-xs">
-                        We couldn&apos;t find any flights matching your
-                        criteria.
+                        We couldn&apos;t find any flights matching your criteria.
                       </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent>
@@ -1205,8 +1216,7 @@ const FlightSearchPage = () => {
                       </Button>
                     </EmptyContent>
                   </Empty>
-                </div>
-              )}
+                )}
               {!loading && !error && flights.length > 0 && (
                 <div className="grid gap-4">
                   {flights

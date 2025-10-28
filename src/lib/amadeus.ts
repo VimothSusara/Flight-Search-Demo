@@ -18,9 +18,21 @@ export async function getAccessToken() {
 
 export async function searchAmadeusFlights(params: Record<string, string>) {
   const token = await getAccessToken();
-  const { data } = await axios.get(`${AMADEUS_API}/v2/shopping/flight-offers`, {
-    headers: { Authorization: `Bearer ${token}` },
-    params,
-  });
-  return data;
+ 
+  try {
+    const { data } = await axios.get(`${AMADEUS_API}/v2/shopping/flight-offers`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params,
+    });
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Amadeus API error:", error.response?.data || error.message);
+    } else if (error instanceof Error) {
+      console.error("Amadeus API error:", error.message);
+    } else {
+      console.error("Amadeus API error:", error);
+    }
+    throw error;
+  }
 }
