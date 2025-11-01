@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Check, ChevronDownIcon, RefreshCwIcon, Search } from "lucide-react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronDownIcon,
+  RefreshCwIcon,
+  Search,
+} from "lucide-react";
 import React from "react";
 import {
   Command,
@@ -37,11 +43,18 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAirportSearch } from "@/lib/useAirportSearch";
 
 const airports = [
   {
@@ -133,7 +146,6 @@ export interface Flight {
   apiRaw?: unknown; // Raw API response for modal details
 }
 
-
 const FlightCardSkeleton = () => (
   <div className="w-full">
     <div className="border rounded-lg shadow-sm p-4 flex justify-between items-center animate-pulse bg-white">
@@ -195,8 +207,8 @@ const FlightSearchPage = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [searchParams, setSearchParams] = React.useState<FlightSearchParams>({
-    departure: "CDG",
-    arrival: "AUS",
+    departure: "",
+    arrival: "",
     currency: "USD",
     outbound_date: format(getTomorrow(), "yyyy-MM-dd"),
     return_date: format(getDayAfterTomorrow(), "yyyy-MM-dd"),
@@ -230,6 +242,20 @@ const FlightSearchPage = () => {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 
+  const {
+    searchTerm: departureQuery,
+    setSearchTerm: setDepartureQuery,
+    airports: departureAirports,
+    loading: loadingDeparture,
+  } = useAirportSearch();
+
+  const {
+    searchTerm: arrivalQuery,
+    setSearchTerm: setArrivalQuery,
+    airports: arrivalAirports,
+    loading: loadingArrival,
+  } = useAirportSearch();
+
   const searchFlights = async () => {
     if (!searchParams.departure || !searchParams.arrival) {
       setError("Please select departure and arrival airports.");
@@ -237,6 +263,11 @@ const FlightSearchPage = () => {
     }
     if (!outboundDate || outboundDate < tomorrow) {
       setError("Outbound date must be tomorrow or later.");
+      return;
+    }
+
+    if (!selectedDepartureAirports || !selectedArrivalAirports) {
+      setError("Please select valid departure and arrival airports.");
       return;
     }
 
@@ -262,7 +293,9 @@ const FlightSearchPage = () => {
       }),
       adults: searchParams.adults || "1",
       ...(searchParams.children && { children: searchParams.children }),
-      ...(searchParams.infants_in_seat && { infants: searchParams.infants_in_seat }),
+      ...(searchParams.infants_in_seat && {
+        infants: searchParams.infants_in_seat,
+      }),
       travelClass: travelClassValue,
       nonStop: nonStopValue,
       max: "250",
@@ -278,31 +311,36 @@ const FlightSearchPage = () => {
       if (data.error) {
         setError(data.error);
         setFlights([]);
-  // setPriceInsights(null);
+        // setPriceInsights(null);
       } else {
         setFlights(data.flights_data || []);
-  // setPriceInsights(data.price_insights || null);
+        // setPriceInsights(data.price_insights || null);
 
-        // if (data.flights_data) {
-        //   // Auto-select airlines
-        //   const airlines = new Set<string>();
-        //   const departureAirports = new Set<string>();
-        //   const arrivalAirports = new Set<string>();
+        if (data.flights_data) {
+          const airlines = new Set<string>();
+          const departureAirports = new Set<string>();
+          const arrivalAirports = new Set<string>();
+          const travelOffices = new Set<string>();
 
-        //   data.flights_data.forEach((f: Flight) =>
-        //     f.flights.forEach((ff) => {
-        //       airlines.add(ff.airline);
-        //       departureAirports.add(ff.departure_airport.name);
-        //       arrivalAirports.add(ff.arrival_airport.name);
-        //     })
-        //   );
+          data.flights_data.forEach((f: Flight) => {
+            f.flights.forEach((ff) => {
+              airlines.add(ff.airline);
+              departureAirports.add(ff.departure_airport.name);
+              arrivalAirports.add(ff.arrival_airport.name);
+            });
+            if (f.travel_offices) {
+              f.travel_offices.forEach((office) => {
+                travelOffices.add(office.name);
+              });
+            }
+          });
 
-        //   setSelectedAirlines(Array.from(airlines));
-        //   setSelectedDepartureAirports(Array.from(departureAirports));
-        //   setSelectedArrivalAirports(Array.from(arrivalAirports));
-        // }
+          setSelectedAirlines(Array.from(airlines));
+          setSelectedDepartureAirports(Array.from(departureAirports));
+          setSelectedArrivalAirports(Array.from(arrivalAirports));
+          setSelectedTravelOffices(Array.from(travelOffices));
+        }
 
-        // Show warning if only one-way flights returned for round-trip search
         if (
           selectedFlightType === 1 &&
           data.flights_data.length > 0 &&
@@ -356,6 +394,66 @@ const FlightSearchPage = () => {
     return Array.from(set);
   }, [flights]);
 
+  const filteredFlights = React.useMemo(() => {
+    return flights.filter((flight) => {
+      // Flight type filter
+      if (selectedFlightType === 1) {
+        // Accept both .type and .oneWay for roundtrip
+        const isRoundTrip =
+          flight.type === "roundtrip" ||
+          (flight as unknown as { oneWay?: boolean }).oneWay === false;
+        if (!isRoundTrip) return false;
+      }
+      if (selectedFlightType === 2) {
+        const isOneWay =
+          flight.type === "oneway" ||
+          (flight as unknown as { oneWay?: boolean }).oneWay === true;
+        if (!isOneWay) return false;
+      }
+
+      // Travel Office filter
+      const matchesTravelOffice =
+        selectedTravelOffices.length === 0 ||
+        (flight.travel_offices &&
+          flight.travel_offices.some((office) =>
+            selectedTravelOffices.includes(office.name)
+          ));
+
+      // Airline filter
+      const matchesAirline =
+        selectedAirlines.length === 0 ||
+        flight.flights.some((f) => selectedAirlines.includes(f.airline));
+
+      // Departure airport filter
+      const matchesDeparture =
+        selectedDepartureAirports.length === 0 ||
+        flight.flights.some((f) =>
+          selectedDepartureAirports.includes(f.departure_airport.name)
+        );
+
+      // Arrival airport filter
+      const matchesArrival =
+        selectedArrivalAirports.length === 0 ||
+        flight.flights.some((f) =>
+          selectedArrivalAirports.includes(f.arrival_airport.name)
+        );
+
+      return (
+        matchesTravelOffice &&
+        matchesAirline &&
+        matchesDeparture &&
+        matchesArrival
+      );
+    });
+  }, [
+    flights,
+    selectedFlightType,
+    selectedTravelOffices,
+    selectedAirlines,
+    selectedDepartureAirports,
+    selectedArrivalAirports,
+  ]);
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200">
@@ -372,7 +470,7 @@ const FlightSearchPage = () => {
               background: "transparent",
             }}
           >
-            <div className="flex gap-4 justify-between items-center">
+            <div className="flex gap-5 justify-start items-center">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -656,7 +754,7 @@ const FlightSearchPage = () => {
                 </PopoverContent>
               </Popover>
 
-              <Popover>
+              {/* <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
@@ -732,7 +830,7 @@ const FlightSearchPage = () => {
                     </FieldGroup>
                   </div>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
             </div>
 
             <div className="space-y-4">
@@ -755,20 +853,28 @@ const FlightSearchPage = () => {
                     </PopoverTrigger>
                     <PopoverContent>
                       <Command>
-                        <CommandInput placeholder="Search airports..." />
+                        <CommandInput
+                          placeholder="Search departure airports..."
+                          value={departureQuery}
+                          onValueChange={(v) => setDepartureQuery(v)}
+                        />
                         <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
+                          {loadingDeparture && (
+                            <CommandItem disabled>
+                              Loading airports...
+                            </CommandItem>
+                          )}
+                          {!loadingDeparture &&
+                            departureAirports.length === 0 && (
+                              <CommandEmpty>No results found.</CommandEmpty>
+                            )}
                           <CommandGroup>
-                            {airports.map((airport) => (
+                            {departureAirports.map((airport) => (
                               <CommandItem
                                 key={airport.value}
                                 value={airport.value}
                                 onSelect={(currentValue) => {
-                                  setDeparture(
-                                    currentValue == departure
-                                      ? ""
-                                      : currentValue
-                                  );
+                                  setDeparture(currentValue);
                                   setSearchParams({
                                     ...searchParams,
                                     departure: currentValue,
@@ -810,18 +916,27 @@ const FlightSearchPage = () => {
                     </PopoverTrigger>
                     <PopoverContent>
                       <Command>
-                        <CommandInput placeholder="Search airports..." />
+                        <CommandInput
+                          placeholder="Search arrival airports..."
+                          value={arrivalQuery}
+                          onValueChange={(v) => setArrivalQuery(v)}
+                        />
                         <CommandList>
-                          <CommandEmpty>No results found.</CommandEmpty>
+                          {loadingArrival && (
+                            <CommandItem disabled>
+                              Loading airports...
+                            </CommandItem>
+                          )}
+                          {!loadingArrival && arrivalAirports.length === 0 && (
+                            <CommandEmpty>No results found.</CommandEmpty>
+                          )}
                           <CommandGroup>
-                            {airports.map((airport) => (
+                            {arrivalAirports.map((airport) => (
                               <CommandItem
                                 key={airport.value}
                                 value={airport.value}
                                 onSelect={(currentValue) => {
-                                  setArrival(
-                                    currentValue == arrival ? "" : currentValue
-                                  );
+                                  setArrival(currentValue);
                                   setSearchParams({
                                     ...searchParams,
                                     arrival: currentValue,
@@ -964,12 +1079,22 @@ const FlightSearchPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full md:w-3/4 h-full mx-auto">
             <div className="hidden md:col-span-1 border shadow-lg md:flex flex-col h-[calc(100vh-7rem)] overflow-y-auto sticky top-5 no-scrollbar px-4 py-6 rounded-2xl bg-white/80 backdrop-blur-md transition-all duration-300">
               <div className="h-16 border-b flex justify-between items-center bg-gradient-to-r from-blue-50 to-white rounded-t-2xl px-2">
-                <Label htmlFor="sort" className="font-bold text-blue-600 px-2 text-lg flex items-center gap-2">
-                 Sort by
+                <Label
+                  htmlFor="sort"
+                  className="font-bold text-blue-600 px-2 text-lg flex items-center gap-2"
+                >
+                  Sort by
                 </Label>
                 <Select>
-                  <SelectTrigger className="w-32 mr-2 mt-2 mb-2" size="sm" defaultValue="1">
-                    <SelectValue placeholder="Select..." className="bg-transparent" />
+                  <SelectTrigger
+                    className="w-32 mr-2 mt-2 mb-2"
+                    size="sm"
+                    defaultValue="1"
+                  >
+                    <SelectValue
+                      placeholder="Select..."
+                      className="bg-transparent"
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1">Top Flights</SelectItem>
@@ -987,7 +1112,7 @@ const FlightSearchPage = () => {
                   Filters
                 </Label>
                 <Label className="cursor-pointer text-xs font-normal text-blue-400">
-                  {flights.length} results
+                  {filteredFlights.length} results
                 </Label>
               </div>
               <Separator className="my-2" />
@@ -995,7 +1120,9 @@ const FlightSearchPage = () => {
               <div className="flex flex-col px-2 mt-3 gap-4">
                 <div className="flex flex-start items-center gap-2">
                   <span>🏢</span>
-                  <Label className="text-blue-600 font-semibold">Travel Offices</Label>
+                  <Label className="text-blue-600 font-semibold">
+                    Travel Offices
+                  </Label>
                 </div>
 
                 <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
@@ -1038,7 +1165,9 @@ const FlightSearchPage = () => {
               <div className="flex flex-col px-2 mt-3 gap-4">
                 <div className="flex flex-start items-center gap-2">
                   <span>✈️</span>
-                  <Label className="text-blue-600 font-semibold">Airlines</Label>
+                  <Label className="text-blue-600 font-semibold">
+                    Airlines
+                  </Label>
                 </div>
 
                 <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
@@ -1081,7 +1210,9 @@ const FlightSearchPage = () => {
               <div className="flex flex-col px-2 mt-3 gap-4">
                 <div className="flex flex-start items-center gap-2">
                   <span>🛫</span>
-                  <Label className="text-blue-600 font-semibold">Departure Airports</Label>
+                  <Label className="text-blue-600 font-semibold">
+                    Departure Airports
+                  </Label>
                 </div>
 
                 <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
@@ -1124,7 +1255,9 @@ const FlightSearchPage = () => {
               <div className="flex flex-col px-2 mt-3 gap-4">
                 <div className="flex flex-start items-center gap-2">
                   <span>🛬</span>
-                  <Label className="text-blue-600 font-semibold">Arrival Airports</Label>
+                  <Label className="text-blue-600 font-semibold">
+                    Arrival Airports
+                  </Label>
                 </div>
 
                 <div className="flex flex-col space-y-4 my-3 bg-blue-50 rounded-xl p-2">
@@ -1175,87 +1308,34 @@ const FlightSearchPage = () => {
               {error && <p className="text-red-500">{error}</p>}
               {!loading && !error && flights.length > 0 && (
                 <div className="grid gap-4">
-                  {flights
-                    .filter((flight) => {
-                      // Only show roundtrip flights if roundtrip is selected
-                      if (selectedFlightType === 1) {
-                        // Accept both .type and .oneWay for roundtrip
-                        return flight.type === "roundtrip" || (flight as unknown as { oneWay?: boolean }).oneWay === false;
-                      }
-                      // Only show oneway flights if oneway is selected
-                      if (selectedFlightType === 2) {
-                        return flight.type === "oneway" || (flight as unknown as { oneWay?: boolean }).oneWay === true;
-                      }
-                      return true;
-                    })
-                    .map((flight, index) => (
-                      <div key={index} className="w-full px-3 py-2">
-                        <FlightCard parent_flight={flight} />
-                      </div>
-                    ))}
+                  {filteredFlights.map((flight, index) => (
+                    <div key={index} className="w-full px-3 py-2">
+                      <FlightCard parent_flight={flight} />
+                    </div>
+                  ))}
                 </div>
               )}
-                {/* Show Empty state if no flights found and not loading or error */}
-                {!loading && !error && flights.length === 0 && (
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyTitle>No Flights Found</EmptyTitle>
-                      <EmptyDescription className="text-muted-foreground text-xs">
-                        We couldn&apos;t find any flights matching your criteria.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 bg-white text-blue-400 hover:bg-blue-400 hover:text-white"
-                        onClick={searchFlights}
-                      >
-                        <RefreshCwIcon />
-                        Refresh
-                      </Button>
-                    </EmptyContent>
-                  </Empty>
-                )}
-              {!loading && !error && flights.length > 0 && (
-                <div className="grid gap-4">
-                  {flights
-                    .filter((flight) => {
-                      // Airline filter
-                      const matchesAirline =
-                        selectedAirlines.length === 0 ||
-                        flight.flights.some((f) =>
-                          selectedAirlines.includes(f.airline)
-                        );
-
-                      // Departure airport filter
-                      const matchesDeparture =
-                        selectedDepartureAirports.length === 0 ||
-                        flight.flights.some((f) =>
-                          selectedDepartureAirports.includes(
-                            f.departure_airport.name
-                          )
-                        );
-
-                      // Arrival airport filter
-                      const matchesArrival =
-                        selectedArrivalAirports.length === 0 ||
-                        flight.flights.some((f) =>
-                          selectedArrivalAirports.includes(
-                            f.arrival_airport.name
-                          )
-                        );
-
-                      return (
-                        matchesAirline && matchesDeparture && matchesArrival
-                      );
-                    })
-                    .map((flight, index) => (
-                      <div key={index} className="w-full px-3 py-2">
-                        <FlightCard parent_flight={flight} />
-                      </div>
-                    ))}
-                </div>
+              {/* Show Empty state if no flights found and not loading or error */}
+              {!loading && !error && flights.length === 0 && (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>No Flights Found</EmptyTitle>
+                    <EmptyDescription className="text-muted-foreground text-xs">
+                      We couldn&apos;t find any flights matching your criteria.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 bg-white text-blue-400 hover:bg-blue-400 hover:text-white"
+                      onClick={searchFlights}
+                    >
+                      <RefreshCwIcon />
+                      Refresh
+                    </Button>
+                  </EmptyContent>
+                </Empty>
               )}
             </div>
           </div>
