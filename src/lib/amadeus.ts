@@ -18,7 +18,7 @@ export async function getAccessToken() {
 
 export async function searchAmadeusFlights(params: Record<string, string>) {
   const token = await getAccessToken();
- 
+
   try {
     const { data } = await axios.get(`${AMADEUS_API}/v2/shopping/flight-offers`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -32,6 +32,45 @@ export async function searchAmadeusFlights(params: Record<string, string>) {
       console.error("Amadeus API error:", error.message);
     } else {
       console.error("Amadeus API error:", error);
+    }
+    throw error;
+  }
+}
+
+export async function getAmadeusLocations(keyword: string) {
+  const token = await getAccessToken();
+
+  try {
+    // Try the airport and city location endpoint first
+    const { data } = await axios.get(`${AMADEUS_API}/v1/reference-data/locations`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        keyword,
+        subType: "AIRPORT,CITY",
+        view: "LIGHT"
+      },
+    });
+    console.log("Amadeus Locations API response:", data);
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Amadeus Locations API error:", error.response?.data || error.message);
+
+      // If the main endpoint fails, try the airports endpoint
+      try {
+        const { data } = await axios.get(`${AMADEUS_API}/v1/reference-data/locations/airports`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { keyword },
+        });
+        console.log("Amadeus Airports API response:", data);
+        return data;
+      } catch (secondError) {
+        console.error("Amadeus Airports API also failed:", secondError);
+      }
+    } else if (error instanceof Error) {
+      console.error("Amadeus Locations API error:", error.message);
+    } else {
+      console.error("Amadeus Locations API error:", error);
     }
     throw error;
   }

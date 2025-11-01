@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { NextRequest, NextResponse } from 'next/server';
 import { aggregateFlightSearches } from "@/lib/flightAggregator";
+import mockData from './mockData.json';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;

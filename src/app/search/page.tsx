@@ -207,16 +207,16 @@ const FlightSearchPage = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [searchParams, setSearchParams] = React.useState<FlightSearchParams>({
-    departure: "",
-    arrival: "",
+    departure: "CDG",
+    arrival: "LHR",
     currency: "USD",
     outbound_date: format(getTomorrow(), "yyyy-MM-dd"),
     return_date: format(getDayAfterTomorrow(), "yyyy-MM-dd"),
     type: "1",
     stops: "0",
   });
-  const [departure, setDeparture] = React.useState("");
-  const [arrival, setArrival] = React.useState("");
+  const [departure, setDeparture] = React.useState("CDG");
+  const [arrival, setArrival] = React.useState("LHR");
   const [outboundDate] = React.useState<Date | undefined>(getTomorrow());
   const [returnDate, setReturnDate] = React.useState<Date | undefined>(
     getDayAfterTomorrow()
@@ -266,11 +266,6 @@ const FlightSearchPage = () => {
       return;
     }
 
-    if (!selectedDepartureAirports || !selectedArrivalAirports) {
-      setError("Please select valid departure and arrival airports.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -301,18 +296,31 @@ const FlightSearchPage = () => {
       max: "250",
     }).toString();
 
+    console.log("Flight search query:", query);
+    console.log("Search params:", {
+      departure: searchParams.departure,
+      arrival: searchParams.arrival,
+      departureDate: format(outboundDate, "yyyy-MM-dd"),
+      returnDate: returnDate ? format(returnDate, "yyyy-MM-dd") : undefined,
+    });
+
     try {
       const res = await fetch(`/api/flights?${query}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
+      console.log("API Response status:", res.status);
       const data = await res.json();
+      console.log("API Response data:", data);
+
       if (data.error) {
+        console.error("API returned error:", data.error);
         setError(data.error);
         setFlights([]);
         // setPriceInsights(null);
       } else {
+        console.log("Flights received:", data.flights_data?.length || 0);
         setFlights(data.flights_data || []);
         // setPriceInsights(data.price_insights || null);
 
@@ -351,7 +359,8 @@ const FlightSearchPage = () => {
           );
         }
       }
-    } catch {
+    } catch (error) {
+      console.error("Flight search error:", error);
       setError("Failed to fetch flights. Please try again.");
       setFlights([]);
       // setPriceInsights(null);
@@ -844,15 +853,11 @@ const FlightSearchPage = () => {
                         role="combobox"
                         className="w-full text-blue-500 font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                       >
-                        {departure
-                          ? airports.find(
-                              (airport) => airport.value === departure
-                            )?.label
-                          : "Select Departure"}
+                        {departure || "Select Departure"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent>
-                      <Command>
+                      <Command shouldFilter={false}>
                         <CommandInput
                           placeholder="Search departure airports..."
                           value={departureQuery}
@@ -872,12 +877,12 @@ const FlightSearchPage = () => {
                             {departureAirports.map((airport) => (
                               <CommandItem
                                 key={airport.value}
-                                value={airport.value}
-                                onSelect={(currentValue) => {
-                                  setDeparture(currentValue);
+                                value={airport.label}
+                                onSelect={() => {
+                                  setDeparture(airport.value);
                                   setSearchParams({
                                     ...searchParams,
-                                    departure: currentValue,
+                                    departure: airport.value,
                                   });
                                 }}
                               >
@@ -907,15 +912,11 @@ const FlightSearchPage = () => {
                         role="combobox"
                         className="w-full text-blue-500 font-semibold hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
                       >
-                        {arrival
-                          ? airports.find(
-                              (airport) => airport.value === arrival
-                            )?.label
-                          : "Select Arrival"}
+                        {arrival || "Select Arrival"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent>
-                      <Command>
+                      <Command shouldFilter={false}>
                         <CommandInput
                           placeholder="Search arrival airports..."
                           value={arrivalQuery}
@@ -934,12 +935,12 @@ const FlightSearchPage = () => {
                             {arrivalAirports.map((airport) => (
                               <CommandItem
                                 key={airport.value}
-                                value={airport.value}
-                                onSelect={(currentValue) => {
-                                  setArrival(currentValue);
+                                value={airport.label}
+                                onSelect={() => {
+                                  setArrival(airport.value);
                                   setSearchParams({
                                     ...searchParams,
-                                    arrival: currentValue,
+                                    arrival: airport.value,
                                   });
                                 }}
                               >
