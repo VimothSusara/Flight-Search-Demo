@@ -12,12 +12,11 @@ const airportsList = [
 
 export const useAirportSearch = () => {
     const [searchTerm, setSearchTerm] = React.useState("");
-    const [airports, setAirports] = React.useState<{ value: string; label: string }[]>(airportsList);
+    const [airports, setAirports] = React.useState<{ value: string; label: string }[]>([]);
     const [loading, setLoading] = React.useState(false);
 
     React.useEffect(() => {
         if (!searchTerm || searchTerm.length < 2) {
-            setAirports(airportsList);
             setLoading(false);
             return;
         }

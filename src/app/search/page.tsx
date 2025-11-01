@@ -217,7 +217,9 @@ const FlightSearchPage = () => {
   });
   const [departure, setDeparture] = React.useState("CDG");
   const [arrival, setArrival] = React.useState("LHR");
-  const [outboundDate] = React.useState<Date | undefined>(getTomorrow());
+  const [outboundDate, setOutboundDate] = React.useState<Date | undefined>(
+    getTomorrow()
+  );
   const [returnDate, setReturnDate] = React.useState<Date | undefined>(
     getDayAfterTomorrow()
   );
@@ -503,11 +505,32 @@ const FlightSearchPage = () => {
                         </FieldLabel>
                         <RadioGroup
                           onValueChange={(value) => {
-                            setSelectedFlightType(parseInt(value));
+                            const flightType = parseInt(value);
+                            setSelectedFlightType(flightType);
                             setSearchParams((prev) => ({
                               ...prev,
                               type: value,
                             }));
+
+                            // Clear return date for one-way flights
+                            if (flightType === 2) {
+                              setReturnDate(undefined);
+                              setSearchParams((prev) => ({
+                                ...prev,
+                                return_date: undefined,
+                              }));
+                            } else if (flightType === 1 && !returnDate) {
+                              // Set default return date for round trip if none exists
+                              const defaultReturn = getDayAfterTomorrow();
+                              setReturnDate(defaultReturn);
+                              setSearchParams((prev) => ({
+                                ...prev,
+                                return_date: format(
+                                  defaultReturn,
+                                  "yyyy-MM-dd"
+                                ),
+                              }));
+                            }
                           }}
                         >
                           <FieldLabel htmlFor="round_trip-r2h">
@@ -986,6 +1009,7 @@ const FlightSearchPage = () => {
                         mode="single"
                         selected={outboundDate}
                         onSelect={(date) => {
+                          setOutboundDate(date);
                           setSearchParams({
                             ...searchParams,
                             outbound_date: date
@@ -1012,13 +1036,20 @@ const FlightSearchPage = () => {
                       <Button
                         variant="outline"
                         data-empty={!returnDate}
-                        className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full"
+                        className={cn(
+                          "data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full",
+                          selectedFlightType === 2 &&
+                            "opacity-50 cursor-not-allowed"
+                        )}
                         size="lg"
+                        disabled={selectedFlightType === 2}
                       >
                         <div className="flex items-center space-x-2">
                           <CalendarIcon className="text-blue-500" size={18} />
                           <span>
-                            {returnDate
+                            {selectedFlightType === 2
+                              ? "One Way"
+                              : returnDate
                               ? format(returnDate, "EEE, MMM d")
                               : "Return"}
                           </span>
@@ -1031,6 +1062,7 @@ const FlightSearchPage = () => {
                         mode="single"
                         selected={returnDate}
                         onSelect={(date) => {
+                          if (selectedFlightType === 2) return; // Don't allow selection for one-way
                           setReturnDate(date);
                           setSearchParams({
                             ...searchParams,
@@ -1040,7 +1072,9 @@ const FlightSearchPage = () => {
                           });
                         }}
                         disabled={(date) =>
-                          !outboundDate || date <= outboundDate
+                          selectedFlightType === 2 ||
+                          !outboundDate ||
+                          date <= outboundDate
                         }
                       />
                     </PopoverContent>

@@ -46,8 +46,7 @@ export async function getAmadeusLocations(keyword: string) {
       headers: { Authorization: `Bearer ${token}` },
       params: {
         keyword,
-        subType: "AIRPORT,CITY",
-        view: "LIGHT"
+        subType: "AIRPORT",
       },
     });
     console.log("Amadeus Locations API response:", data);
